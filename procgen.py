@@ -53,7 +53,7 @@ def rectangular_room(room_limits: tuple[int, int], map_size: tuple[int, int]) ->
 
 def generate_dungeon(max_rooms: int, room_limits: tuple[int, int], map_size: tuple[int, int], player: Entity) -> GameMap:
     """Generates a new dungeon map"""
-    dungeon = GameMap(*map_size)
+    dungeon = GameMap(map_size)
 
     rooms: list[RectangularRoom] = [rectangular_room(room_limits, map_size)]
     dungeon.tiles[rooms[0].inner] = tile_types.floor
