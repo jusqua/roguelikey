@@ -8,12 +8,15 @@ from entity import Entity
 
 
 class Engine:
-    def __init__(self, player: Entity, entities: set[Entity], game_map: GameMap, event_handler: EventHandler) -> None:
+    def __init__(self, player: Entity, game_map: GameMap, event_handler: EventHandler) -> None:
         self.player = player
-        self.entities = entities
         self.game_map = game_map
         self.event_handler = event_handler
         self.update_fov()
+
+    def handle_enemy_turn(self) -> None:
+        for enemy in self.game_map.entities - {self.player}:
+            print(f"{enemy.name} stay stoned for its sake.")
 
     def handle_events(self, events: Iterator[Any]) -> None:
         for event in events:
@@ -23,7 +26,7 @@ class Engine:
                 continue
 
             action.perform(self, self.player)
-
+            self.handle_enemy_turn()
             self.update_fov()
 
     def update_fov(self) -> None:
@@ -33,10 +36,6 @@ class Engine:
     
     def render(self, console: Console, context: Context) -> None:
         self.game_map.render(console)
-
-        for entity in self.entities:
-            if self.game_map.visible[entity.info[0:2]]:
-                console.print(*entity.info)
 
         context.present(console)
         console.clear()

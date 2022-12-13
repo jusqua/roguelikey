@@ -25,13 +25,22 @@ class EscapeAction(Action):
         raise SystemExit
 
 
-class MovementAction(Action):
+class ActionWithDirection(Action):
     def __init__(self, dx: int, dy: int) -> None:
-        super().__init__()
+        self.dx, self.dy = dx, dy
 
-        self.dx = dx
-        self.dy = dy
 
+class MeleeAction(ActionWithDirection):
+    def perform(self, engine: Engine, entity: Entity) -> None:
+        dest = entity.x + self.dx, entity.y + self.dy
+        target = engine.game_map.get_blocking_entity_at_position(dest)
+        if not target:
+            return
+
+        print(f"{target.name} was DESTROYED! Of course not.")
+
+
+class MovementAction(ActionWithDirection):
     def perform(self, engine: Engine, entity: Entity) -> None:
         dest = entity.x + self.dx, entity.y + self.dy
 
@@ -39,6 +48,18 @@ class MovementAction(Action):
             return
         if not engine.game_map.tiles["walkable"][*dest]:
             return
+        if engine.game_map.get_blocking_entity_at_position(dest):
+            return
 
         entity.move(self.dx, self.dy)
+
+
+class BumpAction(ActionWithDirection):
+    def perform(self, engine: Engine, entity: Entity) -> None:
+        dest = entity.x + self.dx, entity.y + self.dy
+
+        if engine.game_map.get_blocking_entity_at_position(dest):
+            return MeleeAction(self.dx, self.dy).perform(engine, entity)
+        else:
+            return MovementAction(self.dx, self.dy).perform(engine, entity)
 

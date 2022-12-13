@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import Iterator, TYPE_CHECKING
-from random import choice, randint
+from random import choice, randint, random
 from game_map import GameMap
 import tile_types
+import entity_factory
 import tcod
 
 if TYPE_CHECKING:
@@ -51,9 +52,29 @@ def rectangular_room(room_limits: tuple[int, int], map_size: tuple[int, int]) ->
     return RectangularRoom(*room_position, *room_size)
 
 
-def generate_dungeon(max_rooms: int, room_limits: tuple[int, int], map_size: tuple[int, int], player: Entity) -> GameMap:
+def place_enemies(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room: int) -> None:
+    number_of_enemies = randint(0, max_enemies_per_room)
+
+    for _ in range(number_of_enemies):
+        x = randint(room.x1 + 1, room.x2 - 1)
+        y = randint(room.y1 + 1, room.y2 - 1)
+
+        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
+            if random() < 0.8:
+                entity_factory.orc.spawn(dungeon, (x, y))
+            else:
+                entity_factory.troll.spawn(dungeon, (x, y))
+
+
+def generate_dungeon(
+        max_rooms: int,
+        max_enemies_per_room: int,
+        room_limits: tuple[int, int],
+        map_size: tuple[int, int],
+        player: Entity
+    ) -> GameMap:
     """Generates a new dungeon map"""
-    dungeon = GameMap(map_size)
+    dungeon = GameMap(map_size, entities=[player])
 
     rooms: list[RectangularRoom] = [rectangular_room(room_limits, map_size)]
     dungeon.tiles[rooms[0].inner] = tile_types.floor
@@ -70,6 +91,7 @@ def generate_dungeon(max_rooms: int, room_limits: tuple[int, int], map_size: tup
         for position in tunnel_between(rooms[-1].center, new_room.center):
             dungeon.tiles[position] = tile_types.floor
 
+        place_enemies(new_room, dungeon, max_enemies_per_room)
         rooms.append(new_room)
 
     return dungeon
