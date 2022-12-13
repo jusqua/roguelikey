@@ -1,6 +1,5 @@
 from copy import deepcopy
 from engine import Engine
-from input_handling import EventHandler
 from procgen import generate_dungeon
 import tcod
 import entity_factory
@@ -16,17 +15,17 @@ def main() -> None:
     tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 32, 8, tcod.tileset.CHARMAP_TCOD)
 
     player = deepcopy(entity_factory.player)
-    game_map = generate_dungeon(max_rooms, max_enemies_per_room, room_limits, map_size, player)
+    engine = Engine(player)
+    engine.game_map = generate_dungeon(max_rooms, max_enemies_per_room, room_limits, map_size, engine)
 
-    event_handler = EventHandler()
-    engine = Engine(player, game_map, event_handler)
+    engine.update_fov()
 
     with tcod.context.new_terminal(*screen_size, tileset=tileset, title="Roguelike", vsync=True) as context:
         root_console = tcod.Console(*screen_size, order="F")
 
         while True:
             engine.render(root_console, context)
-            engine.handle_events(tcod.event.wait())
+            engine.event_handler.handle_events()
 
 
 if __name__ == "__main__":

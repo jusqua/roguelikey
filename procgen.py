@@ -7,7 +7,7 @@ import entity_factory
 import tcod
 
 if TYPE_CHECKING:
-    from entity import Entity
+    from engine import Engine
 
 
 class RectangularRoom:
@@ -71,14 +71,15 @@ def generate_dungeon(
         max_enemies_per_room: int,
         room_limits: tuple[int, int],
         map_size: tuple[int, int],
-        player: Entity
+        engine: Engine
     ) -> GameMap:
     """Generates a new dungeon map"""
-    dungeon = GameMap(map_size, entities=[player])
+    player = engine.player
+    dungeon = GameMap(engine, map_size, entities=[player])
 
     rooms: list[RectangularRoom] = [rectangular_room(room_limits, map_size)]
     dungeon.tiles[rooms[0].inner] = tile_types.floor
-    player.x, player.y = rooms[0].center
+    player.place(rooms[0].center, dungeon)
 
     for _ in range(max_rooms - 1):
         new_room = rectangular_room(room_limits, map_size)
