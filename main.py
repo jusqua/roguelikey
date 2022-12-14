@@ -3,6 +3,7 @@ from engine import Engine
 from procgen import generate_dungeon
 import tcod
 import entity_factory
+import color
 
 
 def main() -> None:
@@ -17,6 +18,7 @@ def main() -> None:
     player = deepcopy(entity_factory.player)
     engine = Engine(player)
     engine.game_map = generate_dungeon(max_rooms, max_enemies_per_room, room_limits, map_size, engine)
+    engine.message_log.add_message("Hello and welcome, adventure, to this ... roguelike?", color.welcome_text)
 
     engine.update_fov()
 
@@ -24,8 +26,10 @@ def main() -> None:
         root_console = tcod.Console(*screen_size, order="F")
 
         while True:
-            engine.render(root_console, context)
-            engine.event_handler.handle_events()
+            root_console.clear()
+            engine.event_handler.on_render(root_console)
+            context.present(root_console)
+            engine.event_handler.handle_events(context)
 
 
 if __name__ == "__main__":

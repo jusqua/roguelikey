@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import color
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity, Actor
@@ -61,9 +62,18 @@ class MeleeAction(ActionWithDirection):
             return
 
         damage = self.entity.fighter.power - target.fighter.defense
-        self.engine.new_log(f"{target.name} suffer {damage} hit points")
+        attack_description = f"{self.entity.name.capitalize()} attacks {target.name}"
+
+        if self.entity is self.engine.player:
+            attack_color = color.player_attack
+        else:
+            attack_color = color.enemy_attack
+
         if damage > 0:
+            self.engine.message_log.add_message(f"{attack_description} for {damage} hit points.", attack_color)
             target.fighter.hp -= damage
+        else:
+            self.engine.message_log.add_message(f"{attack_description} but does no damage.", attack_color)
 
 
 class MovementAction(ActionWithDirection):

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
 from input_handling import GameOverEventHandler
 from render_order import RenderOrder
+import color
 if TYPE_CHECKING:
     from entity import Actor
 
@@ -28,10 +29,10 @@ class Fighter(BaseComponent):
 
     def die(self) -> None:
         if self.engine.player is self.entity:
-            self.engine.new_log("You died!")
+            self.engine.message_log.add_message("You died!", color.player_die)
             self.engine.event_handler = GameOverEventHandler(self.engine)
         else:
-            self.engine.new_log(f"{self.entity.name} is dead!")
+            self.engine.message_log.add_message(f"{self.entity.name} is dead!", color.enemy_die)
 
         self.entity.char = "%"
         self.entity.color = (191, 0, 0)
