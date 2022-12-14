@@ -1,10 +1,11 @@
 from __future__ import annotations
-from copy import deepcopy
 from typing import TYPE_CHECKING
-
-
+from copy import deepcopy
+from render_order import RenderOrder
 if TYPE_CHECKING:
     from game_map import GameMap
+    from components.ai import BaseAI
+    from components.fighter import Fighter
 
 
 class Entity:
@@ -14,19 +15,22 @@ class Entity:
 
     game_map: GameMap
 
-    def __init__(self,
-            name: str = "<Unnamed>",
-            char: str = "?",
-            color: tuple[int, int, int] = (255, 255, 255),
-            position: tuple[int, int] = (0, 0),
-            blocks_movement: bool = True,
-            game_map: GameMap | None = None
-        ) -> None:
+    def __init__(
+        self,
+        name: str = "<Unnamed>",
+        char: str = "?",
+        color: tuple[int, int, int] = (255, 255, 255),
+        position: tuple[int, int] = (0, 0),
+        blocks_movement: bool = True,
+        game_map: GameMap | None = None,
+        render_order: RenderOrder = RenderOrder.CORPSE
+    ) -> None:
         self.name = name
         self.char = char
         self.color = color
         self.x, self.y = position
         self.blocks_movement = blocks_movement
+        self.render_order = render_order
         if game_map:
             self.game_map = game_map
             game_map.entities.add(self)
@@ -58,4 +62,32 @@ class Entity:
     @property
     def info(self) -> tuple[int, int, str, tuple[int, int, int]]:
         return self.x, self.y, self.char, self.color
+
+    @property
+    def position(self) -> tuple[int, int]:
+        return self.x, self.y
+
+
+class Actor(Entity):
+    def __init__(
+        self,
+        ai: type[BaseAI],
+        fighter: Fighter,
+        name: str = "<Unnamed>",
+        char: str = "?",
+        color: tuple[int, int, int] = (255, 255, 255),
+        position: tuple[int, int] = (0, 0),
+        blocks_movement: bool = True,
+        game_map: GameMap | None = None,
+    ) -> None:
+        super().__init__(name, char, color, position, blocks_movement, game_map, RenderOrder.ACTOR)
+
+        self.ai: BaseAI | None = ai(self)
+        self.fighter = fighter
+        self.fighter.entity = self
+
+    @property
+    def is_alive(self) -> bool:
+        """Verify if this actor can perform actions"""
+        return bool(self.ai)
 

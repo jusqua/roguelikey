@@ -1,14 +1,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-
-# Prevent circular import, and use for only type checking
 if TYPE_CHECKING:
     from engine import Engine
-    from entity import Entity
+    from entity import Entity, Actor
 
 
 class Action:
-    def __init__(self, entity: Entity) -> None:
+    def __init__(self, entity: Actor) -> None:
         self.entity = entity
 
     @property
@@ -32,8 +30,13 @@ class EscapeAction(Action):
         raise SystemExit
 
 
+class WaitAction(Action):
+    def perform(self) -> None:
+        pass
+
+
 class ActionWithDirection(Action):
-    def __init__(self, entity: Entity, dx: int, dy: int) -> None:
+    def __init__(self, entity: Actor, dx: int, dy: int) -> None:
         super().__init__(entity)
         self.dx, self.dy = dx, dy
 
@@ -45,14 +48,22 @@ class ActionWithDirection(Action):
     def blocking_entity(self) -> Entity | None:
         return self.engine.game_map.get_blocking_entity_at(self.position)
 
+    @property
+    def target_actor(self) -> Actor | None:
+        """Return the actor at this action destination"""
+        return self.engine.game_map.get_actor_at(self.position)
+
 
 class MeleeAction(ActionWithDirection):
     def perform(self) -> None:
-        target = self.blocking_entity
+        target = self.target_actor
         if not target:
             return
 
-        print(f"{target.name} was DESTROYED! Of course not.")
+        damage = self.entity.fighter.power - target.fighter.defense
+        self.engine.new_log(f"{target.name} suffer {damage} hit points")
+        if damage > 0:
+            target.fighter.hp -= damage
 
 
 class MovementAction(ActionWithDirection):
@@ -69,7 +80,7 @@ class MovementAction(ActionWithDirection):
 
 class BumpAction(ActionWithDirection):
     def perform(self) -> None:
-        if self.blocking_entity:
+        if self.target_actor:
             return MeleeAction(self.entity, self.dx, self.dy).perform()
         else:
             return MovementAction(self.entity, self.dx, self.dy).perform()
