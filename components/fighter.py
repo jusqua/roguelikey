@@ -27,6 +27,15 @@ class Fighter(BaseComponent):
         if self._hp == 0 and self.parent.ai:
             self.die()
 
+    def heal(self, amount: int) -> int:
+        new_hp_value = min(self.hp + amount, self.max_hp)
+        amount_recovered = new_hp_value - self.hp
+        self.hp = new_hp_value
+        return amount_recovered
+
+    def take_damage(self, amount: int) -> None:
+        self.hp -= amount
+
     def die(self) -> None:
         if self.engine.player is self.parent:
             self.engine.message_log.add_message("You died!", color.player_die)

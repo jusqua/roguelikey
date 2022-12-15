@@ -2,10 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from copy import deepcopy
 from render_order import RenderOrder
+from components.inventory import Inventory
 if TYPE_CHECKING:
     from game_map import GameMap
     from components.ai import BaseAI
     from components.fighter import Fighter
+    from components.consumable import Consumable
 
 
 class Entity:
@@ -21,7 +23,7 @@ class Entity:
         char: str = "?",
         color: tuple[int, int, int] = (255, 255, 255),
         position: tuple[int, int] = (0, 0),
-        blocks_movement: bool = True,
+        blocks_movement: bool = False,
         parent: GameMap | None = None,
         render_order: RenderOrder = RenderOrder.CORPSE
     ) -> None:
@@ -83,15 +85,32 @@ class Actor(Entity):
         position: tuple[int, int] = (0, 0),
         blocks_movement: bool = True,
         game_map: GameMap | None = None,
+        inventory: Inventory | None = None
     ) -> None:
         super().__init__(name, char, color, position, blocks_movement, game_map, RenderOrder.ACTOR)
 
         self.ai: BaseAI | None = ai(self)
+
         self.fighter = fighter
         self.fighter.parent = self
+
+        if inventory is None:
+            inventory = Inventory(0)
+
+        self.inventory = inventory
+        self.inventory.parent = self
 
     @property
     def is_alive(self) -> bool:
         """Verify if this actor can perform actions"""
         return bool(self.ai)
+
+
+class Item(Entity):
+    parent: Inventory | GameMap
+
+    def __init__(self, consumable: Consumable, name: str = "<Unnamed>", char: str = "?", color: tuple[int, int, int] = (255, 255, 255), position: tuple[int, int] = (0, 0), blocks_movement: bool = False, parent: GameMap | None = None) -> None:
+        super().__init__(name, char, color, position, blocks_movement, parent, RenderOrder.ITEM)
+        self.consumable = consumable
+        self.consumable.parent = self
 

@@ -5,7 +5,6 @@ from game_map import GameMap
 import tile_types
 import entity_factory
 import tcod
-
 if TYPE_CHECKING:
     from engine import Engine
 
@@ -52,12 +51,16 @@ def rectangular_room(room_limits: tuple[int, int], map_size: tuple[int, int]) ->
     return RectangularRoom(*room_position, *room_size)
 
 
-def place_enemies(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room: int) -> None:
+def get_random_position_at(room: RectangularRoom) -> tuple[int, int]:
+    return randint(room.x1 + 1, room.x2 - 1), randint(room.y1 + 1, room.y2 - 1)
+
+
+def place_entities(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room: int, max_items_per_room: int) -> None:
     number_of_enemies = randint(0, max_enemies_per_room)
+    number_of_items = randint(0, max_items_per_room)
 
     for _ in range(number_of_enemies):
-        x = randint(room.x1 + 1, room.x2 - 1)
-        y = randint(room.y1 + 1, room.y2 - 1)
+        x, y = get_random_position_at(room)
 
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
             if random() < 0.8:
@@ -65,10 +68,17 @@ def place_enemies(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room:
             else:
                 entity_factory.troll.spawn(dungeon, (x, y))
 
+    for _ in range(number_of_items):
+        x, y = get_random_position_at(room)
+
+        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
+            entity_factory.health_potion.spawn(dungeon, (x, y))
+
 
 def generate_dungeon(
         max_rooms: int,
         max_enemies_per_room: int,
+        max_items_per_room: int,
         room_limits: tuple[int, int],
         map_size: tuple[int, int],
         engine: Engine
@@ -92,7 +102,7 @@ def generate_dungeon(
         for position in tunnel_between(rooms[-1].center, new_room.center):
             dungeon.tiles[position] = tile_types.floor
 
-        place_enemies(new_room, dungeon, max_enemies_per_room)
+        place_entities(new_room, dungeon, max_enemies_per_room, max_items_per_room)
         rooms.append(new_room)
 
     return dungeon

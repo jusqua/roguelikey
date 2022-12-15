@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from action import Action, MovementAction, MeleeAction, WaitAction
 import numpy as np
 import tcod
-from action import Action, MovementAction, MeleeAction, WaitAction
 if TYPE_CHECKING:
     from entity import Actor
 

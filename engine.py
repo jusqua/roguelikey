@@ -5,6 +5,7 @@ from tcod.map import compute_fov
 from input_handling import MainGameEventHandler
 from render_functions import render_bar, render_name_at_mouse
 from message_log import MessageLog
+from exception import Impossible
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap
@@ -23,7 +24,10 @@ class Engine:
     def handle_enemy_turn(self) -> None:
         for enemy in set(self.game_map.actors) - {self.player}:
             if enemy.ai:
-                enemy.ai.perform()
+                try:
+                    enemy.ai.perform()
+                except Impossible:
+                    pass
 
     def update_fov(self) -> None:
         """Recompute visible area based on the player POV"""
