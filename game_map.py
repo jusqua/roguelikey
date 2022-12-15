@@ -21,6 +21,10 @@ class GameMap:
         self.entities = set(entities)
 
     @property
+    def game_map(self) -> GameMap:
+        return self
+
+    @property
     def actors(self) -> Iterator[Actor]:
         """Iterate over this map actors"""
         yield from (

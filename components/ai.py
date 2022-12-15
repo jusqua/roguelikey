@@ -3,13 +3,11 @@ from typing import TYPE_CHECKING
 import numpy as np
 import tcod
 from action import Action, MovementAction, MeleeAction, WaitAction
-from components.base_component import BaseComponent
 if TYPE_CHECKING:
     from entity import Actor
 
 
-class BaseAI(Action, BaseComponent):
-    entity: Actor
+class BaseAI(Action):
     def get_path_to(self, destination: tuple[int, int]) -> list[tuple[int, int]]:
         """
         Compute path to the target position

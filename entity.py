@@ -13,7 +13,7 @@ class Entity:
     Generic object to represent general propouses entities
     """
 
-    game_map: GameMap
+    parent: GameMap
 
     def __init__(
         self,
@@ -22,7 +22,7 @@ class Entity:
         color: tuple[int, int, int] = (255, 255, 255),
         position: tuple[int, int] = (0, 0),
         blocks_movement: bool = True,
-        game_map: GameMap | None = None,
+        parent: GameMap | None = None,
         render_order: RenderOrder = RenderOrder.CORPSE
     ) -> None:
         self.name = name
@@ -31,15 +31,15 @@ class Entity:
         self.x, self.y = position
         self.blocks_movement = blocks_movement
         self.render_order = render_order
-        if game_map:
-            self.game_map = game_map
-            game_map.entities.add(self)
+        if parent:
+            self.parent = parent
+            parent.entities.add(self)
 
     def spawn(self, game_map: GameMap, position: tuple[int, int]) -> Entity:
         """Spawn a copy of this instance at the given location in the game map"""
         clone = deepcopy(self)
         clone.x, clone.y = position
-        clone.game_map = game_map
+        clone.parent = game_map
         game_map.entities.add(clone)
         return clone
     
@@ -47,9 +47,9 @@ class Entity:
         """Handle moving across new location, i.e. game maps"""
         self.x, self.y = position
         if game_map:
-            if hasattr(self, "game_map"):
+            if hasattr(self, "parent"):
                 self.game_map.entities.remove(self)
-            self.game_map = game_map
+            self.parent = game_map
             game_map.entities.add(self)
 
     def move(self, dx: int, dy: int) -> None:
@@ -66,6 +66,10 @@ class Entity:
     @property
     def position(self) -> tuple[int, int]:
         return self.x, self.y
+
+    @property
+    def game_map(self) -> GameMap:
+        return self.parent
 
 
 class Actor(Entity):
@@ -84,7 +88,7 @@ class Actor(Entity):
 
         self.ai: BaseAI | None = ai(self)
         self.fighter = fighter
-        self.fighter.entity = self
+        self.fighter.parent = self
 
     @property
     def is_alive(self) -> bool:
