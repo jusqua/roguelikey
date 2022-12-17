@@ -76,7 +76,7 @@ class MovementAction(ActionWithDirection):
     def perform(self) -> None:
         if (
             not self.engine.game_map.in_bounds(*self.position) or
-            not self.engine.game_map.tiles["walkable"][*self.position] or
+            not self.engine.game_map.tiles["walkable"][self.position] or
             self.blocking_entity
         ):
             raise Impossible("That way is blocked")
