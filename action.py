@@ -80,8 +80,11 @@ class MovementAction(ActionWithDirection):
             self.blocking_entity
         ):
             raise Impossible("That way is blocked")
-
+        
         self.entity.move(self.dx, self.dy)
+        if self.engine.player is self.entity:
+            self.engine.is_mouse_motion = False
+            self.engine.mouse_location = self.engine.player.position
 
 
 class BumpAction(ActionWithDirection):

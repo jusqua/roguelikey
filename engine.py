@@ -19,6 +19,7 @@ class Engine:
         self.player = player
         self.message_log = MessageLog()
         self.mouse_location: tuple[int, int] = (0, 0)
+        self.is_mouse_motion: bool = False
         self.event_handler: EventHandler = MainGameEventHandler(self)
 
     def handle_enemy_turn(self) -> None:

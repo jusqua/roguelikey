@@ -72,8 +72,15 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room
         x, y = get_random_position_at(room)
 
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            entity_factory.health_potion.spawn(dungeon, (x, y))
-
+            match random():
+                case n if n < 0.7:
+                    entity_factory.health_potion.spawn(dungeon, (x, y))
+                case n if n < 0.8:
+                    entity_factory.fireball_scroll.spawn(dungeon, (x, y))
+                case n if n < 0.9:
+                    entity_factory.confusion_scroll.spawn(dungeon, (x, y))
+                case _:
+                    entity_factory.lightning_scroll.spawn(dungeon, (x, y))
 
 def generate_dungeon(
         max_rooms: int,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from copy import deepcopy
+from math import sqrt
 from render_order import RenderOrder
 from components.inventory import Inventory
 if TYPE_CHECKING:
@@ -44,6 +45,10 @@ class Entity:
         clone.parent = game_map
         game_map.entities.add(clone)
         return clone
+
+    def distance_between(self, x: int, y: int) -> float:
+        """Return the distance between self and other position"""
+        return sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
     
     def place(self, position: tuple[int, int], game_map: GameMap | None = None) -> None:
         """Handle moving across new location, i.e. game maps"""

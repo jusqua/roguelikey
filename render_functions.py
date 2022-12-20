@@ -12,7 +12,15 @@ def get_names_at(position: tuple[int, int], game_map: GameMap) -> str:
         return ""
 
     x, y = position
-    names = ", ".join(entity.name for entity in game_map.entities if entity.x == x and entity.y == y)
+    entities = set(game_map.entities)
+    if not game_map.engine.is_mouse_motion:
+        entities -= { game_map.engine.player }
+
+    names = ", ".join(
+        entity.name
+        for entity in entities
+        if entity.x == x and entity.y == y
+    )
     return names.capitalize()
 
 
