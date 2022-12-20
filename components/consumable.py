@@ -5,7 +5,7 @@ from components.base_component import BaseComponent
 from components.inventory import Inventory
 from action import Action, ItemAction
 from exception import Impossible
-from input_handling import SingleRangedAttackHandler, AreaRangedAttackHandler
+from input_handling import SingleRangedAttackHandler, AreaRangedAttackHandler, BaseEventHandler
 import color
 if TYPE_CHECKING:
     from entity import Actor, Item
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Consumable(BaseComponent):
     parent: Item
 
-    def action(self, consumer: Actor) -> Action | None:
+    def action(self, consumer: Actor) -> Action | BaseEventHandler | None:
         """Try to resolve action for this consumable"""
         return ItemAction(consumer, self.parent)
     
@@ -78,9 +78,9 @@ class ConfusionConsumable(Consumable):
     def __init__(self, number_of_turns: int) -> None:
         self.number_of_turns = number_of_turns
 
-    def action(self, consumer: Actor) -> Action | None:
+    def action(self, consumer: Actor) -> SingleRangedAttackHandler:
         self.engine.message_log.add_message("Select a target location.", color.needs_target)
-        self.engine.event_handler = SingleRangedAttackHandler(self.engine, lambda position: ItemAction(consumer, self.parent, position))
+        return SingleRangedAttackHandler(self.engine, lambda position: ItemAction(consumer, self.parent, position))
 
     def activate(self, action: ItemAction) -> None:
         consumer = action.entity
@@ -103,9 +103,9 @@ class FireballDamageConsumable(Consumable):
         self.radius = radius
         self.damage = damage
 
-    def action(self, consumer: Actor) -> Action | None:
+    def action(self, consumer: Actor) -> AreaRangedAttackHandler:
         self.engine.message_log.add_message("Select a target location.", color.needs_target)
-        self.engine.event_handler = AreaRangedAttackHandler(self.engine, self.radius, lambda position: ItemAction(consumer, self.parent, position))
+        return AreaRangedAttackHandler(self.engine, self.radius, lambda position: ItemAction(consumer, self.parent, position))
 
     def activate(self, action: ItemAction) -> None:
         if not self.engine.game_map.visible[action.target_position]:

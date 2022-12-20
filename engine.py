@@ -2,14 +2,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from tcod.console import Console
 from tcod.map import compute_fov
-from input_handling import MainGameEventHandler
 from render_functions import render_bar, render_name_at_mouse
 from message_log import MessageLog
 from exception import Impossible
+import lzma
+import pickle
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap
-    from input_handling import EventHandler
 
 
 class Engine:
@@ -20,7 +20,6 @@ class Engine:
         self.message_log = MessageLog()
         self.mouse_location: tuple[int, int] = (0, 0)
         self.is_mouse_motion: bool = False
-        self.event_handler: EventHandler = MainGameEventHandler(self)
 
     def handle_enemy_turn(self) -> None:
         for enemy in set(self.game_map.actors) - {self.player}:
@@ -29,6 +28,12 @@ class Engine:
                     enemy.ai.perform()
                 except Impossible:
                     pass
+
+    def save_as(self, filename: str) -> None:
+        """Save this engine instance in compressed file."""
+        save_data = lzma.compress(pickle.dumps(self))
+        with open(filename, "wb") as file:
+            file.write(save_data)
 
     def update_fov(self) -> None:
         """Recompute visible area based on the player POV"""
