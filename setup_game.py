@@ -2,8 +2,8 @@ from __future__ import annotations
 from copy import deepcopy
 from tcod.console import Console
 from engine import Engine
+from game_map import GameWorld
 from input_handling import BaseEventHandler, MainGameEventHandler, PopupMessage
-from procgen import generate_dungeon
 import entity_factory
 import color
 import tcod
@@ -27,7 +27,7 @@ def new_game() -> Engine:
     player = deepcopy(entity_factory.player)
     engine = Engine(player)
 
-    engine.game_map = generate_dungeon(
+    engine.game_world = GameWorld(
         max_rooms,
         max_enemies_per_room,
         max_items_per_room,
@@ -35,6 +35,8 @@ def new_game() -> Engine:
         map_size,
         engine
     )
+
+    engine.game_world.generate_floor()
     engine.update_fov()
 
     engine.message_log.add_message("Hello and welcome, adventure, to this ... roguelike?", color.welcome_text)

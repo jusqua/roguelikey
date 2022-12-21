@@ -82,6 +82,7 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room
                 case _:
                     entity_factory.lightning_scroll.spawn(dungeon, (x, y))
 
+
 def generate_dungeon(
         max_rooms: int,
         max_enemies_per_room: int,
@@ -97,6 +98,7 @@ def generate_dungeon(
     rooms: list[RectangularRoom] = [rectangular_room(room_limits, map_size)]
     dungeon.tiles[rooms[0].inner] = tile_types.floor
     player.place(rooms[0].center, dungeon)
+    center_of_last_room = rooms[0].center
 
     for _ in range(max_rooms - 1):
         new_room = rectangular_room(room_limits, map_size)
@@ -109,7 +111,13 @@ def generate_dungeon(
         for position in tunnel_between(rooms[-1].center, new_room.center):
             dungeon.tiles[position] = tile_types.floor
 
+        center_of_last_room = new_room.center
+
         place_entities(new_room, dungeon, max_enemies_per_room, max_items_per_room)
+
+        dungeon.tiles[center_of_last_room] = tile_types.down_stairs
+        dungeon.down_stairs_location = center_of_last_room
+
         rooms.append(new_room)
 
     return dungeon

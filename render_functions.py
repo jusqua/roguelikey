@@ -24,6 +24,11 @@ def get_names_at(position: tuple[int, int], game_map: GameMap) -> str:
     return names.capitalize()
 
 
+def render_dungeon_level(console: Console, dungeon_level: int, location: tuple[int, int]) -> None:
+    """Render the current dungeon level were the player on."""
+    console.print(*location, f"DL {dungeon_level}")
+
+
 def render_bar(console: Console, current_value: int, maximum_value: int, total_width: int) -> None:
     gap = 3
     total_width -= gap

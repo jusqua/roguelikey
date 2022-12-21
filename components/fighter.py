@@ -48,3 +48,5 @@ class Fighter(BaseComponent):
         self.parent.name = f"remains of {self.parent.name}"
         self.parent.render_order = RenderOrder.CORPSE
 
+        self.engine.player.level.add_xp(self.parent.level.xp_given)
+

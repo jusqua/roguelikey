@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from components.ai import BaseAI
     from components.fighter import Fighter
     from components.consumable import Consumable
+    from components.level import Level
 
 
 class Entity:
@@ -84,6 +85,7 @@ class Actor(Entity):
         self,
         ai: type[BaseAI],
         fighter: Fighter,
+        level: Level,
         name: str = "<Unnamed>",
         char: str = "?",
         color: tuple[int, int, int] = (255, 255, 255),
@@ -98,6 +100,9 @@ class Actor(Entity):
 
         self.fighter = fighter
         self.fighter.parent = self
+
+        self.level = level
+        self.level.parent = self
 
         if inventory is None:
             inventory = Inventory(0)

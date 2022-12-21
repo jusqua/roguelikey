@@ -128,6 +128,8 @@ class EventHandler(BaseEventHandler):
         elif self.handle_action(action_or_state):
             if not self.engine.player.is_alive:
                 return GameOverEventHandler(self.engine)
+            elif self.engine.player.level.requires_level_up:
+                return LevelUpEventHandler(self.engine)
             return MainGameEventHandler(self.engine)
         return self
 
@@ -160,12 +162,16 @@ class MainGameEventHandler(EventHandler):
         player = self.engine.player
 
         match event.sym:
+            case key if key == tcod.event.K_PERIOD and event.mod & tcod.event.KMOD_SHIFT:
+                return TakeDownStairsAction(player)
             case key if key in MOVE_KEYS:
                 return BumpAction(player, *MOVE_KEYS[key])
             case key if key in WAIT_KEYS:
                 return WaitAction(player)
             case tcod.event.K_g:
                 return PickupAction(player)
+            case tcod.event.K_c:
+                return CharacterScreenEventHandler(self.engine)
             case tcod.event.K_v:
                 return HistoryViewer(self.engine)
             case tcod.event.K_i:
@@ -192,6 +198,15 @@ class GameOverEventHandler(EventHandler):
         if event.sym == tcod.event.K_ESCAPE:
             self.on_quit()
         return None
+
+
+class TakeDownStairsAction(Action):
+    def perform(self) -> None:
+        """Take the stairs, if any exists at entity's location."""
+        if self.entity.position != self.engine.game_map.down_stairs_location:
+            raise Impossible("There are no stairs here.")
+        self.engine.game_world.generate_floor()
+        self.engine.message_log.add_message("You decend the staircase.", color.decend)
 
 
 class HistoryViewer(EventHandler):
@@ -243,6 +258,7 @@ class AskUserEventHandler(EventHandler):
             return None
         return self.on_exit()
 
+
     def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown) -> Action | BaseEventHandler | None:
         """By default any mouse click exit this input handler"""
         return self.on_exit()
@@ -250,6 +266,63 @@ class AskUserEventHandler(EventHandler):
     def on_exit(self) -> Action | BaseEventHandler | None:
         """Called when user try to exit or cancel an action"""
         return MainGameEventHandler(self.engine)
+
+
+class CharacterScreenEventHandler(AskUserEventHandler):
+    TITLE = "Character Information"
+
+    def on_render(self, console: Console) -> None:
+        super().on_render(console)
+
+        x = 40 if self.engine.player.x <= 30 else 0
+        y = 0
+
+        width = len(self.TITLE) + 4
+
+        console.draw_frame(x, y, width, 7, self.TITLE, fg=color.white, bg=color.black)
+        console.print(x + 1, y + 1, f"Level: {self.engine.player.level.current_level}")
+        console.print(x + 1, y + 2, f"XP: {self.engine.player.level.current_xp}")
+        console.print(x + 1, y + 3, f"XP for next Level: {self.engine.player.level.experience_to_next_level}",)
+        console.print(x + 1, y + 4, f"Attack: {self.engine.player.fighter.power}")
+        console.print(x + 1, y + 5, f"Defense: {self.engine.player.fighter.defense}")
+
+
+class LevelUpEventHandler(AskUserEventHandler):
+    TITLE = "Level Up"
+
+    def on_render(self, console: Console) -> None:
+        super().on_render(console)
+
+        x = 40 if self.engine.player.x <= 30 else 0
+
+        console.draw_frame(x, 0, 35, 8, self.TITLE, fg=color.white, bg=color.black)
+        x += 1
+
+        console.print(x, 1, "Congratulations! You level up!")
+        console.print(x, 2, "Select an attribute to increase.")
+
+        console.print(x, 4, f"[a] Constitution (+20 HP, from {self.engine.player.fighter.max_hp})")
+        console.print(x, 5, f"[b] Strength (+1 attack, from {self.engine.player.fighter.power})")
+        console.print(x, 6, f"[c] Agility (+1 defense, from {self.engine.player.fighter.defense})")
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
+        player = self.engine.player
+
+        match event.sym:
+            case tcod.event.K_a:
+                player.level.increase_max_hp()
+            case tcod.event.K_b:
+                player.level.increase_power()
+            case tcod.event.K_c:
+                player.level.increase_defense()
+            case _:
+                self.engine.message_log.add_message("Invalid entry.", color.invalid)
+                return None
+        return super().ev_keydown(event)
+
+    def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown) -> Action | BaseEventHandler | None:
+        """Prevent from exit clicking with mouse."""
+        return None
 
 
 class InventoryEventHandler(AskUserEventHandler):
