@@ -1,3 +1,4 @@
+import os
 from input_handling import BaseEventHandler, EventHandler
 from exception import QuitWithoutSave
 import tcod
@@ -14,7 +15,9 @@ def save_game(handler: BaseEventHandler, filename: str) -> None:
 
 def main() -> None:
     screen_size = 80, 50
-    tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 32, 8, tcod.tileset.CHARMAP_TCOD)
+    # https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
+    tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437)
+    os.environ["SDL_RENDER_SCALE_QUALITY"] = "best"
 
     handler: BaseEventHandler = setup_game.MainMenu()
 
@@ -25,7 +28,7 @@ def main() -> None:
             while True:
                 root_console.clear()
                 handler.on_render(root_console)
-                context.present(root_console)
+                context.present(root_console, keep_aspect=True, integer_scaling=True)
                 try:
                     for event in tcod.event.wait():
                         context.convert_event(event)
