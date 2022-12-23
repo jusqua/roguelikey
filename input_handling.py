@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Callable, Union
-from action import Action, DropAction, BumpAction, WaitAction, PickupAction
+from action import Action, DropAction, BumpAction, EquipAction, WaitAction, PickupAction
 from tcod.console import Console
 from exception import Impossible, QuitWithoutSave
 import tcod.constants
@@ -280,11 +280,20 @@ class CharacterScreenEventHandler(AskUserEventHandler):
         width = len(self.TITLE) + 4
 
         console.draw_frame(x, y, width, 7, self.TITLE, fg=color.white, bg=color.black)
+
         console.print(x + 1, y + 1, f"Level: {self.engine.player.level.current_level}")
         console.print(x + 1, y + 2, f"XP: {self.engine.player.level.current_xp}")
         console.print(x + 1, y + 3, f"XP for next Level: {self.engine.player.level.experience_to_next_level}",)
-        console.print(x + 1, y + 4, f"Attack: {self.engine.player.fighter.power}")
-        console.print(x + 1, y + 5, f"Defense: {self.engine.player.fighter.defense}")
+
+        attack_string = f"Attack: {self.engine.player.fighter.base_power}"
+        signal = "+" if self.engine.player.fighter.power_bonus > 0 else ""
+        attack_string += f" ({signal}{self.engine.player.fighter.power_bonus})"
+        console.print(x + 1, y + 4, attack_string)
+
+        defense_string = f"Defense: {self.engine.player.fighter.base_defense}"
+        signal = "+" if self.engine.player.fighter.defense_bonus > 0 else ""
+        defense_string += f" ({signal}{self.engine.player.fighter.defense_bonus})"
+        console.print(x + 1, y + 5, defense_string)
 
 
 class LevelUpEventHandler(AskUserEventHandler):
@@ -338,19 +347,22 @@ class InventoryEventHandler(AskUserEventHandler):
 
         size = len(self.TITLE) + 4, number_of_items_in_inventory + 2
 
-        if self.engine.player.x <= 30:
-            x = 40
-        else:
-            x = 0
+        x = 40 if self.engine.player.x <= 30 else 0
         y = 0
 
         console.draw_frame(x, y, *size, self.TITLE, fg=(255, 255, 255), bg=(0, 0, 0))
-        if number_of_items_in_inventory > 0:
-            for i, item in enumerate(inventory.items):
-                item_key = chr(ord("a") + i)
-                console.print(x + 1, y + 1 + i, f"[{item_key}] {item.name}")
-        else:
+        if number_of_items_in_inventory <= 0:
             console.print(x + 1, y + 1, f"(Empty)")
+            return
+
+        for i, item in enumerate(inventory.items):
+            item_key = chr(ord("a") + i)
+
+            item_string = f"[{item_key}] {item.name}"
+            if self.engine.player.equipment.is_item_equipped(item):
+                item_string += " (E)"
+
+            console.print(x + 1, y + 1 + i, item_string)
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
         player = self.engine.player
@@ -379,7 +391,10 @@ class InventoryActivateHandler(InventoryEventHandler):
 
     def on_item_selected(self, item: Item) -> Action | BaseEventHandler | None:
         """Return action for selected item"""
-        return item.consumable.action(self.engine.player)
+        if item.consumable:
+            return item.consumable.action(self.engine.player)
+        elif item.equippable:
+            return EquipAction(self.engine.player, item)
 
 
 class InvetoryDropHandler(InventoryEventHandler):

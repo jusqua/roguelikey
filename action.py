@@ -110,7 +110,8 @@ class ItemAction(Action):
 
     def perform(self) -> None:
         """Invoke item ability"""
-        self.item.consumable.activate(self)
+        if self.item.consumable:
+            self.item.consumable.activate(self)
 
 
 class PickupAction(Action):
@@ -136,5 +137,17 @@ class PickupAction(Action):
 
 class DropAction(ItemAction):
     def perform(self) -> None:
+        if self.entity.equipment.is_item_equipped(self.item):
+            self.entity.equipment.toggle_equip(self.item)
+
         self.entity.inventory.drop(self.item)
+
+
+class EquipAction(Action):
+    def __init__(self, entity: Actor, item: Item) -> None:
+        super().__init__(entity)
+        self.item = item
+
+    def perform(self) -> None:
+        self.entity.equipment.toggle_equip(self.item)
 

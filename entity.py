@@ -4,11 +4,13 @@ from copy import deepcopy
 from math import sqrt
 from render_order import RenderOrder
 from components.inventory import Inventory
+from components.equipment import Equipment
 if TYPE_CHECKING:
     from game_map import GameMap
     from components.ai import BaseAI
     from components.fighter import Fighter
     from components.consumable import Consumable
+    from components.equippable import Equippable
     from components.level import Level
 
 
@@ -92,7 +94,8 @@ class Actor(Entity):
         position: tuple[int, int] = (0, 0),
         blocks_movement: bool = True,
         game_map: GameMap | None = None,
-        inventory: Inventory | None = None
+        inventory: Inventory | None = None,
+        equipment: Equipment | None = None
     ) -> None:
         super().__init__(name, char, color, position, blocks_movement, game_map, RenderOrder.ACTOR)
 
@@ -110,6 +113,12 @@ class Actor(Entity):
         self.inventory = inventory
         self.inventory.parent = self
 
+        if equipment is None:
+            equipment = Equipment()
+
+        self.equipment = equipment
+        self.equipment.parent = self
+
     @property
     def is_alive(self) -> bool:
         """Verify if this actor can perform actions"""
@@ -119,8 +128,24 @@ class Actor(Entity):
 class Item(Entity):
     parent: Inventory | GameMap
 
-    def __init__(self, consumable: Consumable, name: str = "<Unnamed>", char: str = "?", color: tuple[int, int, int] = (255, 255, 255), position: tuple[int, int] = (0, 0), blocks_movement: bool = False, parent: GameMap | None = None) -> None:
+    def __init__(
+        self,
+        name: str = "<Unnamed>",
+        char: str = "?",
+        color: tuple[int, int, int] = (255, 255, 255),
+        position: tuple[int, int] = (0, 0),
+        blocks_movement: bool = False,
+        parent: GameMap | None = None,
+        consumable: Consumable | None = None,
+        equippable: Equippable | None = None
+    ) -> None:
         super().__init__(name, char, color, position, blocks_movement, parent, RenderOrder.ITEM)
+
         self.consumable = consumable
-        self.consumable.parent = self
+        if self.consumable:
+            self.consumable.parent = self
+
+        self.equippable = equippable
+        if self.equippable:
+            self.equippable.parent = self
 

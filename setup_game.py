@@ -36,6 +36,16 @@ def new_game() -> Engine:
 
     engine.message_log.add_message("Hello and welcome, adventure, to this ... roguelike?", color.welcome_text)
 
+    dagger = deepcopy(entity_factory.dagger)
+    dagger.parent = player.inventory
+    player.inventory.items.append(dagger)
+    player.equipment.toggle_equip(dagger, False)
+
+    robe = deepcopy(entity_factory.robe)
+    robe.parent = player.inventory
+    player.inventory.items.append(robe)
+    player.equipment.toggle_equip(robe, False)
+
     return engine
 
 
