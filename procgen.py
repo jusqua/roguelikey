@@ -1,12 +1,68 @@
 from __future__ import annotations
 from typing import Iterator, TYPE_CHECKING
-from random import choice, randint, random
+from random import choice, choices, randint, random
 from game_map import GameMap
 import tile_types
 import entity_factory
 import tcod
 if TYPE_CHECKING:
     from engine import Engine
+    from entity import Entity
+
+
+max_items_per_floor = [
+    (1, 1),
+    (4, 2)
+]
+max_enemies_per_floor = [
+    (1, 2),
+    (4, 3),
+    (6, 5)
+]
+
+items_chances: dict[int, list[tuple[Entity, int]]] = {
+    0: [(entity_factory.health_potion, 35)],
+    2: [(entity_factory.confusion_scroll, 10)],
+    4: [(entity_factory.lightning_scroll, 25)],
+    6: [(entity_factory.fireball_scroll, 25)],
+}
+enemies_chances: dict[int, list[tuple[Entity, int]]] = {
+    0: [(entity_factory.orc, 80)],
+    3: [(entity_factory.troll, 15)],
+    5: [(entity_factory.troll, 30)],
+    7: [(entity_factory.troll, 60)],
+}
+
+
+def get_entities_at_random(
+    weighted_chances_by_floor: dict[int, list[tuple[Entity, int]]],
+    number_of_entities: int,
+    current_floor: int
+) -> list[Entity]:
+    entities: list[Entity] = []
+    entity_weighted_chance_values: list[int] = []
+
+    for key, values in weighted_chances_by_floor.items():
+        if key > current_floor:
+            break
+
+        for entity, weighted_chance in values:
+            entities.append(entity)
+            entity_weighted_chance_values.append(weighted_chance)
+
+    chosen_entities = choices(entities, weights=entity_weighted_chance_values, k=number_of_entities)
+    return chosen_entities
+
+
+def get_max_value_for_floor(max_value_per_floor: list[tuple[int, int]], floor: int) -> int:
+    current_value = 0
+
+    for floor_minimum, value in max_value_per_floor:
+        if floor_minimum > floor:
+            break
+        current_value = value
+
+    return current_value
 
 
 class RectangularRoom:
@@ -55,38 +111,21 @@ def get_random_position_at(room: RectangularRoom) -> tuple[int, int]:
     return randint(room.x1 + 1, room.x2 - 1), randint(room.y1 + 1, room.y2 - 1)
 
 
-def place_entities(room: RectangularRoom, dungeon: GameMap, max_enemies_per_room: int, max_items_per_room: int) -> None:
-    number_of_enemies = randint(0, max_enemies_per_room)
-    number_of_items = randint(0, max_items_per_room)
+def place_entities(room: RectangularRoom, dungeon: GameMap, current_floor: int) -> None:
+    number_of_enemies = randint(0, get_max_value_for_floor(max_enemies_per_floor, current_floor))
+    number_of_items = randint(0, get_max_value_for_floor(max_items_per_floor, current_floor))
 
-    for _ in range(number_of_enemies):
-        x, y = get_random_position_at(room)
+    enemies = get_entities_at_random(enemies_chances, number_of_enemies, current_floor)
+    items = get_entities_at_random(items_chances, number_of_items, current_floor)
 
-        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            if random() < 0.8:
-                entity_factory.orc.spawn(dungeon, (x, y))
-            else:
-                entity_factory.troll.spawn(dungeon, (x, y))
-
-    for _ in range(number_of_items):
-        x, y = get_random_position_at(room)
-
-        if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            match random():
-                case n if n < 0.7:
-                    entity_factory.health_potion.spawn(dungeon, (x, y))
-                case n if n < 0.8:
-                    entity_factory.fireball_scroll.spawn(dungeon, (x, y))
-                case n if n < 0.9:
-                    entity_factory.confusion_scroll.spawn(dungeon, (x, y))
-                case _:
-                    entity_factory.lightning_scroll.spawn(dungeon, (x, y))
+    for entity in enemies + items:
+        position = get_random_position_at(room)
+        if not any(position == entity.position for entity in dungeon.entities):
+            entity.spawn(dungeon, position)
 
 
 def generate_dungeon(
         max_rooms: int,
-        max_enemies_per_room: int,
-        max_items_per_room: int,
         room_limits: tuple[int, int],
         map_size: tuple[int, int],
         engine: Engine
@@ -113,7 +152,7 @@ def generate_dungeon(
 
         center_of_last_room = new_room.center
 
-        place_entities(new_room, dungeon, max_enemies_per_room, max_items_per_room)
+        place_entities(new_room, dungeon, engine.game_world.current_floor)
 
         dungeon.tiles[center_of_last_room] = tile_types.down_stairs
         dungeon.down_stairs_location = center_of_last_room

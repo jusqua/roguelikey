@@ -80,8 +80,6 @@ class GameWorld:
     def __init__(
             self,
             max_rooms: int,
-            max_monsters_per_room: int,
-            max_items_per_room: int,
             room_limits: tuple[int, int],
             map_size: tuple[int, int],
             engine: Engine,
@@ -91,8 +89,6 @@ class GameWorld:
         self.map_size = map_size
         self.max_rooms = max_rooms
         self.room_limits = room_limits
-        self.max_monsters_per_room = max_monsters_per_room
-        self.max_items_per_room = max_items_per_room
         self.current_floor = current_floor
 
     def generate_floor(self) -> None:
@@ -100,8 +96,6 @@ class GameWorld:
         self.current_floor += 1
         self.engine.game_map = generate_dungeon(
             self.max_rooms,
-            self.max_monsters_per_room,
-            self.max_items_per_room,
             self.room_limits,
             self.map_size,
             self.engine

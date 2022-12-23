@@ -20,17 +20,12 @@ def new_game() -> Engine:
     map_size = 80, 40
     room_limits = 6, 10
     max_rooms = 30
-    max_enemies_per_room = 2
-    max_items_per_room = 2
-
 
     player = deepcopy(entity_factory.player)
     engine = Engine(player)
 
     engine.game_world = GameWorld(
         max_rooms,
-        max_enemies_per_room,
-        max_items_per_room,
         room_limits,
         map_size,
         engine
