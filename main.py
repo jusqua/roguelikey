@@ -1,29 +1,23 @@
-import os
 from input_handling import BaseEventHandler, EventHandler
 from exception import QuitWithoutSave
-import tcod
+import tcod.context
+import tcod.event
+import tcod.console
 import color
 import traceback
 import setup_game
 
 
-def save_game(handler: BaseEventHandler, filename: str) -> None:
-    """If the current event handler has an active Engine then save it."""
-    if isinstance(handler, EventHandler):
-        handler.engine.save_as(filename)
-
-
 def main() -> None:
-    screen_size = 80, 50
-    # https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
-    tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437)
-    os.environ["SDL_RENDER_SCALE_QUALITY"] = "best"
-
     handler: BaseEventHandler = setup_game.MainMenu()
 
-    with tcod.context.new_terminal(*screen_size, tileset=tileset, title="Roguelikey") as context:
-        root_console = tcod.Console(*screen_size, order="F")
-
+    with tcod.context.new_terminal(
+        *setup_game.screen_size,
+        tileset=setup_game.tileset,
+        title="Roguelikey",
+        sdl_window_flags=tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP
+    ) as context:
+        root_console = tcod.console.Console(*setup_game.screen_size, order="F")
         try:
             while True:
                 root_console.clear()
@@ -40,7 +34,7 @@ def main() -> None:
         except QuitWithoutSave:
             raise
         except (SystemExit, BaseException):
-            save_game(handler, "data.sav")
+            setup_game.save_game(handler, setup_game.save_file_name)
             raise
 
 

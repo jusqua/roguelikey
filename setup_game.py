@@ -3,7 +3,8 @@ from copy import deepcopy
 from tcod.console import Console
 from engine import Engine
 from game_map import GameWorld
-from input_handling import BaseEventHandler, MainGameEventHandler, PopupMessage
+from input_handling import BaseEventHandler, EventHandler, MainGameEventHandler, PopupMessage
+import os
 import entity_factory
 import color
 import tcod
@@ -12,12 +13,21 @@ import pickle
 import traceback
 
 
+# https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
+tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437)
+# [:, :, :3] removes the alpha channel from background
 background_image = tcod.image.load("./assets/menu_background.png")[:, :, :3]
+# Reduce sharp corners from tileset rendering
+os.environ["SDL_RENDER_SCALE_QUALITY"] = "linear"
+# Screen Size
+screen_size = 96, 64
+# Save file name
+save_file_name = "data.sav"
 
 
 def new_game() -> Engine:
     """Return a brand new game as an Engine instance."""
-    map_size = 80, 40
+    map_size = screen_size[0] - 32, screen_size[1]
     room_limits = 6, 10
     max_rooms = 30
 
@@ -47,6 +57,12 @@ def new_game() -> Engine:
     player.equipment.toggle_equip(robe, False)
 
     return engine
+
+
+def save_game(handler: BaseEventHandler, filename: str) -> None:
+    """If the current event handler has an active Engine then save it."""
+    if isinstance(handler, EventHandler):
+        handler.engine.save_as(filename)
 
 
 def load_game(filename: str) -> Engine:
@@ -95,7 +111,7 @@ class MainMenu(BaseEventHandler):
                 raise SystemExit
             case tcod.event.K_c:
                 try:
-                    return MainGameEventHandler(load_game("data.sav"))
+                    return MainGameEventHandler(load_game(save_file_name))
                 except FileNotFoundError:
                     return PopupMessage(self, "No saved game to load.")
                 except Exception as exc:
