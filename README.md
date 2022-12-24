@@ -11,7 +11,9 @@ for [CS50p](cs50.harvard.edu/python/) and recreational propourses
 
 ## Usage
 
-Required installation of `SDL2` development package from your OS
+Required installation of `libSDL2` development package from your OS.
+
+Required Python >= 3.10.
 
 Install `requirements` to run this project
 ```console
