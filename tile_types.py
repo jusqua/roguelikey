@@ -1,4 +1,5 @@
 import numpy as np
+import color
 
 
 graphic_dtype = np.dtype([
@@ -28,24 +29,24 @@ def new_tile(
     return np.array((walkable, transparent, dark, light), dtype=tile_dtype)
 
 
-SHROUD = np.array((ord(" "), (255, 255, 255), (0, 0, 0)), dtype=graphic_dtype)
+SHROUD = np.array((ord(" "), color.white, color.black), dtype=graphic_dtype)
 
 floor = new_tile(
     walkable=True,
     transparent=True,
-    dark=(ord(" "), (255, 255, 255), (50, 50, 150)),
-    light=(ord(" "), (255, 255, 255), (200, 180, 50))
+    dark=(ord(" "), color.white, (50, 50, 150)),
+    light=(ord(" "), color.white, (200, 180, 50))
 )
 wall = new_tile(
     walkable=False,
     transparent=False,
-    dark=(ord(" "), (255, 255, 255), (0, 0, 150)),
-    light=(ord(" "), (255, 255, 255), (130, 110, 50))
+    dark=(ord(" "), color.white, (0, 0, 150)),
+    light=(ord(" "), color.white, (130, 110, 50))
 )
 down_stairs = new_tile(
     walkable=True,
     transparent=True,
     dark=(ord(">"), (0, 0, 100), (50, 50, 150)),
-    light=(ord(">"), (255, 255, 255), (200, 180, 50))
+    light=(ord(">"), color.white, (200, 180, 50))
 )
 

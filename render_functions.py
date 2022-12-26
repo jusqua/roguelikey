@@ -29,18 +29,19 @@ def render_dungeon_level(console: Console, dungeon_level: int, location: tuple[i
     console.print(*location, f"DL {dungeon_level}")
 
 
-def render_bar(console: Console, current_value: int, maximum_value: int, total_width: int) -> None:
+def render_bar(console: Console, current_value: int, maximum_value: int, total_width: int, location: tuple[int, int]) -> None:
     gap = 3
     total_width -= gap
+    x, y = location
 
     bar_width = int(float(current_value) / maximum_value * total_width)
     hp_status = f"{current_value}/{maximum_value}"
 
-    console.draw_rect(gap, 45, total_width, 1, 1, bg=color.bar_empty)
+    console.draw_rect(x + gap, y, total_width, 1, 1, bg=color.bar_empty)
     if bar_width > 0:
-        console.draw_rect(3, 45, bar_width, 1, 1, bg=color.bar_filled)
-    console.print(0, 45, "HP")
-    console.print(gap + int((total_width - len(hp_status)) / 2), 45, hp_status)
+        console.draw_rect(x + gap, y, bar_width, 1, 1, bg=color.bar_filled)
+    console.print(x, y, "HP")
+    console.print(x + gap + int((total_width - len(hp_status)) / 2), y, hp_status)
 
 
 def render_name_at_mouse(console: Console, engine: Engine, position: tuple[int, int]) -> None:
