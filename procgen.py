@@ -104,7 +104,7 @@ def tunnel_between(start: tuple[int, int], end: tuple[int, int]) -> Iterator[tup
 def rectangular_room(room_limits: tuple[int, int], map_size: tuple[int, int]) -> RectangularRoom:
     """Generate a room based on given specs"""
     room_size = randint(*room_limits), randint(*room_limits)
-    room_position = randint(0, map_size[0] - room_size[0] - 1), randint(0, map_size[1] - room_size[1] - 1)
+    room_position = randint(2, map_size[0] - room_size[0] - 3), randint(2, map_size[1] - room_size[1] - 3)
     return RectangularRoom(*room_position, *room_size)
 
 
@@ -129,7 +129,7 @@ def generate_dungeon(
         max_rooms: int,
         room_limits: tuple[int, int],
         map_size: tuple[int, int],
-        engine: Engine
+        engine: Engine,
     ) -> GameMap:
     """Generates a new dungeon map"""
     player = engine.player

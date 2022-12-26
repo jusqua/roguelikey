@@ -67,6 +67,7 @@ class GameMap:
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD
         )
+        console.draw_frame(0, 0, 64, 64)
 
         entities_sorted_rendering = sorted(self.entities, key=lambda x: x.render_order.value)
 
