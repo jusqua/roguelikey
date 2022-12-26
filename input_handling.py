@@ -219,28 +219,27 @@ class HistoryViewer(EventHandler):
     def on_render(self, console: Console) -> None:
         super().on_render(console)
         
-        log_console = Console(console.width - 6, console.height - 6)
-        log_console.draw_frame(0, 0, log_console.width, log_console.height)
-        log_console.print_box(0, 0, log_console.width, 1, "┤ Message history ├", alignment=tcod.constants.CENTER)
+        console.draw_frame(64, 0, 32, 64)
+        console.print_box(64, 0, 32, 1, "┤ History ├", alignment=tcod.constants.CENTER)
+        if self.cursor < self.log_length - 1:
+            console.print(65, 63, "↑")
+        if self.cursor > 0:
+            console.print(66, 63, "↓")
 
         self.engine.message_log.render_messages(
-            log_console,
-            (1, 1),
-            (log_console.width - 2, log_console.height - 2),
+            console,
+            (64, 0),
+            (32, 64),
             self.engine.message_log.messages[:self.cursor + 1]
         )
-        log_console.blit(console, 3, 3)
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> MainGameEventHandler | None:
         key = event.sym
         if key in CURSOR_Y_KEYS:
             adjust = CURSOR_Y_KEYS[key]
-            if adjust < 0 and self.cursor == 0:
-                self.cursor = self.log_length - 1
-            elif adjust > 0 and self.cursor == self.log_length - 1:
-                self.cursor = 0
-            else:
-                self.cursor = max(0, min(self.cursor + adjust, self.log_length - 1))
+            if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == self.log_length - 1):
+                return
+            self.cursor = max(0, min(self.cursor + adjust, self.log_length - 1))
         elif key == tcod.event.K_HOME:
             self.cursor = 0
         elif key == tcod.event.K_END:

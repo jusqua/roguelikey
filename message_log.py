@@ -1,6 +1,8 @@
 from typing import Reversible, Iterable
 from tcod import Console
 from textwrap import wrap
+
+import tcod
 import color
 
 
@@ -32,8 +34,12 @@ class MessageLog:
         else:
             self.messages.append(Message(text, fg))
 
-    def render(self, console: Console, position: tuple[int, int], size: tuple[int, int]) -> None:
+    def render(self, console: Console) -> None:
         """Render this log over the given area"""
+        position = 64, 40
+        size = 32, 24
+        console.draw_frame(*position, *size)
+        console.print_box(*position, size[0], 1, "┤ Logs ├", alignment=tcod.CENTER)
         self.render_messages(console, position, size, self.messages)
 
     @staticmethod
@@ -48,20 +54,26 @@ class MessageLog:
             console: Console,
             position: tuple[int, int],
             size: tuple[int, int],
-            messages: Reversible[Message]
+            messages: Reversible[Message],
+            gap: tuple[int, int] = (2, 2)
         ) -> None:
         """
         Render provided messages
         The `messages` are rendered starting at the last message and working backwords
         """
         x, y = position
-        w, h = size
-        y_offset = h - 1
+        x += gap[0] // 2
+        y += gap[1] // 2
 
+        w, h = size
+        w -= gap[0]
+        h -= gap[1]
+
+        y_offset = 0
         for message in reversed(messages):
-            for line in reversed(list(cls.wrap(message.full_text, w))):
+            for line in cls.wrap(message.full_text, w):
                 console.print(x, y + y_offset, line, message.fg)
-                y_offset -= 1
-                if y_offset < 0:
+                y_offset += 1
+                if y_offset >= h:
                     return
 

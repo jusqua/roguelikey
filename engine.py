@@ -43,7 +43,7 @@ class Engine:
     
     def render(self, console: Console) -> None:
         self.game_map.render(console)
-        self.message_log.render(console, (21, 45), (40, 5))
+        self.message_log.render(console)
         render_bar(console, self.player.fighter.hp, self.player.fighter.max_hp, 20, (0, 45))
         render_dungeon_level(console, self.game_world.current_floor, (0, 47))
         render_name_at_mouse(console, self, (21, 44))
