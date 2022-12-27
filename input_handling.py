@@ -213,18 +213,21 @@ class HistoryViewer(EventHandler):
 
     def on_render(self, console: Console) -> None:
         super().on_render(console)
+
+        x, y, w, h = 64, 40, 32, 24
         
-        console.draw_frame(64, 0, 32, 64, fg=color.white, bg=color.black)
-        console.print_box(64, 0, 32, 1, "┤ History ├", alignment=tcod.constants.CENTER)
+        console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
+        console.print_box(x, y, w, 1, "┤ History ├", alignment=tcod.constants.CENTER)
+        console.print_box(x, y + h - 1, w - 1, 1, "┤ [k] go up | [j] go down ├", alignment=tcod.constants.RIGHT)
         if self.cursor < self.log_length - 1:
-            console.print(65, 63, "↑")
+            console.print(x + 1, y + h - 1, "↑")
         if self.cursor > 0:
-            console.print(66, 63, "↓")
+            console.print(x + 2, y + h - 1, "↓")
 
         self.engine.message_log.render_messages(
             console,
-            (64, 0),
-            (32, 64),
+            (x, y),
+            (w, h),
             self.engine.message_log.messages[:self.cursor + 1]
         )
 
@@ -292,6 +295,11 @@ class LevelUpEventHandler(AskUserEventHandler):
             f"Strength (+1 attack, from {self.engine.player.fighter.base_power})",
             f"Agility (+1 defense, from {self.engine.player.fighter.base_defense})",
         ] 
+        self.functions = [
+            self.engine.player.level.increase_max_hp,
+            self.engine.player.level.increase_power,
+            self.engine.player.level.increase_defense
+        ]
 
     def on_render(self, console: Console) -> None:
         super().on_render(console)
@@ -311,14 +319,7 @@ class LevelUpEventHandler(AskUserEventHandler):
         self.cursor_move(event, len(self.options))
         if event.sym != CONFIRM_KEY:
             return
-
-        match self.cursor:
-            case 0:
-                self.engine.player.level.increase_max_hp()
-            case 1:
-                self.engine.player.level.increase_power()
-            case 2:
-                self.engine.player.level.increase_defense()
+        self.functions[self.cursor]()
 
         return super().ev_keydown(event)
 
@@ -328,10 +329,6 @@ class LevelUpEventHandler(AskUserEventHandler):
 
 
 class InventoryEventHandler(AskUserEventHandler):
-    """Handles user item selection"""
-
-    TITLE = "<Missing title>"
-
     def on_render(self, console: Console) -> None:
         """Render an invetory menu far from the player"""
         super().on_render(console)
