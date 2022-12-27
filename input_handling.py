@@ -217,7 +217,7 @@ class HistoryViewer(EventHandler):
     def on_render(self, console: Console) -> None:
         super().on_render(console)
         
-        console.draw_frame(64, 0, 32, 64)
+        console.draw_frame(64, 0, 32, 64, fg=color.white, bg=color.black)
         console.print_box(64, 0, 32, 1, "┤ History ├", alignment=tcod.constants.CENTER)
         if self.cursor < self.log_length - 1:
             console.print(65, 63, "↑")
