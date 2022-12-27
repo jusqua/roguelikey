@@ -147,7 +147,7 @@ class MainGameEventHandler(EventHandler):
                 return HistoryViewer(self.engine)
             case tcod.event.K_i:
                 return InventoryEventHandler(self.engine)
-            case tcod.event.K_SLASH:
+            case tcod.event.K_f:
                 return LookHandler(self.engine)
 
         return None
