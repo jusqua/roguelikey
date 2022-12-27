@@ -55,28 +55,49 @@ def render_name_at_mouse(console: Console, engine: Engine, position: tuple[int, 
 
 
 def render_status(console: Console, engine: Engine) -> None:
-    console.draw_frame(64, 0, 32, 20)
-    console.print_box(64, 0, 32, 1, "┤ Status ├", alignment=tcod.CENTER)
-    render_bar(console, engine.player.fighter.hp, engine.player.fighter.max_hp, 30, (65, 2))
+    x, y, w, h = 64, 0, 32, 20
+
+    render_name_at_mouse(console, engine, (1, 63))
+
+    console.draw_frame(x, y, w, h)
+    console.print_box(x, y, w, 1, "┤ Status ├", alignment=tcod.CENTER)
+    render_bar(console, engine.player.fighter.hp, engine.player.fighter.max_hp, 30, (x + 1, y + 2))
 
     console.print_box(
-        65, 4, 30, 1,
+        x + 1, y + 4, w - 2, 1,
         f"XP: {engine.player.level.current_xp} / {engine.player.level.experience_to_next_level}",
         alignment=tcod.RIGHT
     )
-    console.print(65, 4, f"Level: {engine.player.level.current_level}")
+    console.print(x + 1, y + 4, f"Level: {engine.player.level.current_level}")
 
     attack_string = f"Attack: {engine.player.fighter.base_power}"
     if engine.player.fighter.power_bonus != 0:
         signal = "+" if engine.player.fighter.power_bonus > 0 else ""
         attack_string += f" ({signal}{engine.player.fighter.power_bonus})"
-    console.print(65, 6, attack_string)
+    console.print(x + 1, y + 6, attack_string)
 
     defense_string = f"Defense: {engine.player.fighter.base_defense}"
     if engine.player.fighter.defense_bonus != 0:
         signal = "+" if engine.player.fighter.defense_bonus > 0 else ""
         defense_string += f" ({signal}{engine.player.fighter.defense_bonus})"
-    console.print(65, 7, defense_string)
+    console.print(x + 1, y + 7, defense_string)
 
-    render_name_at_mouse(console, engine, (1, 63))
+    y = 20
+    console.draw_frame(x, y, w, h)
+    console.print_box(x, y, w, 1, "┤ Equipment ├", alignment=tcod.CENTER)
+    console.print_box(x, y + 2, w, 1, "Weapon", alignment=tcod.CENTER)
+    if engine.player.equipment.weapon and engine.player.equipment.weapon.equippable:
+        console.print(x + 1, y + 3, engine.player.equipment.weapon.name)
+        console.print(x + 1, y + 4, f"Attack Bônus: {engine.player.equipment.weapon.equippable.power_bonus}")
+        console.print(x + 1, y + 5, f"Defense Bônus: {engine.player.equipment.weapon.equippable.defense_bonus}")
+    else:
+        console.print_box(x, y + 4, w, 1, "No Weapon Equipped", alignment=tcod.CENTER)
+
+    console.print_box(x, y + 7, w, 1, "Armor", alignment=tcod.CENTER)
+    if engine.player.equipment.armor and engine.player.equipment.armor.equippable:
+        console.print(x + 1, y + 8, engine.player.equipment.armor.name)
+        console.print(x + 1, y + 9, f"Attack Bônus: {engine.player.equipment.armor.equippable.power_bonus}")
+        console.print(x + 1, y + 10, f"Defense Bônus: {engine.player.equipment.armor.equippable.defense_bonus}")
+    else:
+        console.print_box(x, y + 9, w, 1, "No Armor Equipped", alignment=tcod.CENTER)
 
