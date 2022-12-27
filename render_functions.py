@@ -12,22 +12,20 @@ def get_names_at(position: tuple[int, int], game_map: GameMap) -> str:
     if not game_map.in_bounds(*position) or not game_map.visible[position]:
         return ""
 
-    x, y = position
     entities = set(game_map.entities)
     if not game_map.engine.is_mouse_motion:
         entities -= { game_map.engine.player }
 
-    names = ", ".join(
+    names = [
         entity.name
         for entity in entities
-        if entity.x == x and entity.y == y
-    )
-    return names.capitalize()
+        if entity.position == position
+    ]
 
+    if position == game_map.down_stairs_location:
+        names.insert(0, "Down Stairs")
 
-def render_dungeon_level(console: Console, dungeon_level: int, location: tuple[int, int]) -> None:
-    """Render the current dungeon level were the player on."""
-    console.print(*location, f"DL {dungeon_level}")
+    return ", ".join(names)
 
 
 def render_bar(console: Console, current_value: int, maximum_value: int, total_width: int, location: tuple[int, int]) -> None:
@@ -58,6 +56,17 @@ def render_status(console: Console, engine: Engine) -> None:
     x, y, w, h = 64, 0, 32, 20
 
     render_name_at_mouse(console, engine, (1, 63))
+
+    match engine.game_world.current_floor:
+        case 1:
+            floor = "1st"
+        case 2:
+            floor = "2nd"
+        case 3:
+            floor = "3rd"
+        case _:
+            floor = f"{engine.game_world.current_floor}th"
+    console.print(1, 0, f"┤ {floor} Floor ├")
 
     console.draw_frame(x, y, w, h)
     console.print_box(x, y, w, 1, "┤ Status ├", alignment=tcod.CENTER)
