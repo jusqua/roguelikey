@@ -92,7 +92,7 @@ class MainMenu(BaseEventHandler):
     def render_select(self, console: Console, elements: list[str]) -> None:
         """Handler selection in position"""
         for i, e in enumerate(elements):
-            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, color.black)
+            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, None)
             console.print_box(0, console.height // 2 + i, console.width, 1, e, fg=fg, bg=bg, alignment=tcod.CENTER)
 
     def cursor_move(self, event: tcod.event.KeyDown, elements_length: int) -> None:
