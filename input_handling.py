@@ -192,7 +192,7 @@ class MainGameEventHandler(EventHandler):
             case tcod.event.K_f:
                 return LookHandler(self.engine)
             case tcod.event.K_ESCAPE:
-                return HelpDialog(self)
+                return InGameMenu(self)
 
         return None
 
@@ -282,7 +282,10 @@ class AskUserEventHandler(EventHandler):
         x, y = location
         for i, e in enumerate(elements):
             fg, bg = (color.black, color.white) if self.cursor == i else (color.white, color.black)
-            console.print(x, y + i, e, fg=fg, bg=bg)
+            self.print_element(console, (x, y + i), e, fg=fg, bg=bg, index=i)
+
+    def print_element(self, console: Console, position: tuple[int, int], element: str, index: int = 0, **kwargs):
+        console.print(*position, element, **kwargs)
 
     def cursor_move(self, event: tcod.event.KeyDown, elements_length: int) -> None:
         match event.sym:
@@ -303,6 +306,42 @@ class AskUserEventHandler(EventHandler):
     def on_exit(self) -> Action | BaseEventHandler | None:
         """Called when user try to exit or cancel an action"""
         return MainGameEventHandler(self.engine)
+
+
+class InGameMenu(AskUserEventHandler, PopupMessage):
+    def __init__(self, parent: EventHandler) -> None:
+        self.parent = parent
+        self.engine = parent.engine
+        self.cursor = 0
+
+        self.elements = [
+            "Help",
+            "Save and Quit",
+            "Quit without saving"
+        ]
+        self.functions = [
+            lambda: HelpDialog(self.parent),
+            lambda: (_ for _ in ()).throw(SystemExit),
+            lambda: (_ for _ in ()).throw(QuitWithoutSave),
+        ]
+
+    def on_render(self, console: Console) -> None:
+        self.parent.on_render(console)
+        console.tiles_rgb["fg"] //= 8
+        console.tiles_rgb["bg"] //= 8
+
+        self.render_select(console, self.elements, (console.width // 2, console.height // 2))
+
+    def print_element(self, console: Console, position: tuple[int, int], element: str, index: int = 0, **kwargs):
+        console.print_box(0, console.height // 2 + index, console.width, 1, element, **kwargs, alignment=tcod.constants.CENTER)
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
+        if event.sym in [tcod.event.K_ESCAPE, QUIT_KEY]:
+            return super().ev_keydown(event)
+
+        self.cursor_move(event, len(self.elements))
+        if event.sym == CONFIRM_KEY:
+            return self.functions[self.cursor]()
 
 
 class LevelUpEventHandler(AskUserEventHandler):
