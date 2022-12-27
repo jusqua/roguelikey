@@ -9,26 +9,9 @@ import tcod.event
 import color
 if TYPE_CHECKING:
     from engine import Engine
-    from entity import Item
 
 
 MOVE_KEYS = {
-    tcod.event.K_UP: (0, -1),
-    tcod.event.K_DOWN: (0, 1),
-    tcod.event.K_LEFT: (-1, 0),
-    tcod.event.K_RIGHT: (1, 0),
-    tcod.event.K_HOME: (-1, -1),
-    tcod.event.K_END: (-1, 1),
-    tcod.event.K_PAGEUP: (1, -1),
-    tcod.event.K_PAGEDOWN: (1, 1),
-    tcod.event.K_KP_1: (-1, 1),
-    tcod.event.K_KP_2: (0, 1),
-    tcod.event.K_KP_3: (1, 1),
-    tcod.event.K_KP_4: (-1, 0),
-    tcod.event.K_KP_6: (1, 0),
-    tcod.event.K_KP_7: (-1, -1),
-    tcod.event.K_KP_8: (0, -1),
-    tcod.event.K_KP_9: (1, -1),
     tcod.event.K_h: (-1, 0),
     tcod.event.K_j: (0, 1),
     tcod.event.K_k: (0, -1),
@@ -39,19 +22,9 @@ MOVE_KEYS = {
     tcod.event.K_n: (1, 1),
 }
 
-WAIT_KEYS = {
-    tcod.event.K_PERIOD,
-    tcod.event.K_KP_5,
-    tcod.event.K_CLEAR,
-}
-
 CURSOR_Y_KEYS = {
     tcod.event.K_k: -1,
     tcod.event.K_j: 1,
-    tcod.event.K_UP: -1,
-    tcod.event.K_DOWN: 1,
-    tcod.event.K_PAGEUP: -10,
-    tcod.event.K_PAGEDOWN: 10,
 }
 
 MODIFIER_KEYS = {
@@ -63,7 +36,10 @@ MODIFIER_KEYS = {
     tcod.event.K_RALT,
 }
 
+WAIT_KEYS = tcod.event.K_w
 CONFIRM_KEY = tcod.event.K_SPACE
+QUIT_KEY = tcod.event.K_q
+DISCARD_KEY = tcod.event.K_d
 
 
 class BaseEventHandler(tcod.event.EventDispatch[Union[Action, "BaseEventHandler"]]):
@@ -163,16 +139,14 @@ class MainGameEventHandler(EventHandler):
                 return TakeDownStairsAction(player)
             case key if key in MOVE_KEYS:
                 return BumpAction(player, *MOVE_KEYS[key])
-            case key if key in WAIT_KEYS:
+            case key if key == WAIT_KEYS:
                 return WaitAction(player)
             case tcod.event.K_g:
                 return PickupAction(player)
             case tcod.event.K_v:
                 return HistoryViewer(self.engine)
             case tcod.event.K_i:
-                return InventoryActivateHandler(self.engine)
-            case tcod.event.K_d:
-                return InvetoryDropHandler(self.engine)
+                return InventoryEventHandler(self.engine)
             case tcod.event.K_SLASH:
                 return LookHandler(self.engine)
 
@@ -332,67 +306,48 @@ class InventoryEventHandler(AskUserEventHandler):
     def on_render(self, console: Console) -> None:
         """Render an invetory menu far from the player"""
         super().on_render(console)
-        inventory = self.engine.player.inventory
-        number_of_items_in_inventory = len(inventory.items)
+        number_of_items_in_inventory = len(self.engine.player.inventory.items)
 
-        size = len(self.TITLE) + 4, number_of_items_in_inventory + 2
+        x, y, w, h = 64, 20, 32, 20
 
-        x = 40 if self.engine.player.x <= 30 else 0
-        y = 0
+        console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
+        console.print_box(x, y, w, 1, "┤ Inventory ├", alignment=tcod.constants.CENTER)
+        console.print_box(x, y + h - 1, w - 1, 1, "┤ [SPACE] to use | [d] to drop ├", alignment=tcod.constants.RIGHT)
 
-        console.draw_frame(x, y, *size, self.TITLE, fg=(255, 255, 255), bg=(0, 0, 0))
-        if number_of_items_in_inventory <= 0:
-            console.print(x + 1, y + 1, f"(Empty)")
+        if number_of_items_in_inventory == 0:
+            console.print_box(x, y + h // 2, w, 1, "(Empty)", alignment=tcod.constants.CENTER)
             return
 
-        for i, item in enumerate(inventory.items):
-            item_key = chr(ord("a") + i)
-
-            item_string = f"[{item_key}] {item.name}"
+        items = []
+        for item in self.engine.player.inventory.items:
             if self.engine.player.equipment.is_item_equipped(item):
-                item_string += " (E)"
+                items.append(item.name + " (E)")
+            else:
+                items.append(item.name)
 
-            console.print(x + 1, y + 1 + i, item_string)
+        self.render_select(console, items, (x + 1, y + 1))
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
-        player = self.engine.player
+        number_of_items_in_inventory = len(self.engine.player.inventory.items)
         key = event.sym
-        index = key - tcod.event.K_a
-        
-        if not 0 <= index <= 26:
+
+        if key == QUIT_KEY:
             return super().ev_keydown(event)
 
-        try:
-            selected_item = player.inventory.items[index]
-        except IndexError:
-            self.engine.message_log.add_message("Invalid entry.", color.invalid)
-            return None
+        if number_of_items_in_inventory == 0:
+            return
 
-        return self.on_item_selected(selected_item)
+        self.cursor_move(event, number_of_items_in_inventory)
 
-    def on_item_selected(self, item: Item) -> Action | BaseEventHandler | None:
-        """Called when the user selects a valid item"""
-        raise NotImplementedError
-
-
-class InventoryActivateHandler(InventoryEventHandler):
-    """Handles inventory item usage"""
-    TITLE = "Select an item to use"
-
-    def on_item_selected(self, item: Item) -> Action | BaseEventHandler | None:
-        """Return action for selected item"""
-        if item.consumable:
-            return item.consumable.action(self.engine.player)
-        elif item.equippable:
-            return EquipAction(self.engine.player, item)
-
-
-class InvetoryDropHandler(InventoryEventHandler):
-    """Handles inventory item drop"""
-    TITLE = "Select an item to drop"
-
-    def on_item_selected(self, item: Item) -> Action | BaseEventHandler | None:
-        return DropAction(self.engine.player, item)
+        item = self.engine.player.inventory.items[self.cursor]
+        if key == CONFIRM_KEY:
+            if item.consumable:
+                return item.consumable.action(self.engine.player)
+            elif item.equippable:
+                return EquipAction(self.engine.player, item)
+        elif key == DISCARD_KEY:
+            self.cursor = max(0, self.cursor - 1)
+            return DropAction(self.engine.player, item)
 
 
 class SelectIndexHandler(AskUserEventHandler):

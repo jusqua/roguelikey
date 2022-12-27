@@ -57,7 +57,7 @@ class Entity:
         """Handle moving across new location, i.e. game maps"""
         self.x, self.y = position
         if game_map:
-            if hasattr(self, "parent"):
+            if hasattr(self, "parent") and not isinstance(self.parent, Inventory):
                 self.game_map.entities.remove(self)
             self.parent = game_map
             game_map.entities.add(self)
