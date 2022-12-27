@@ -2,11 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from tcod.console import Console
 from tcod.map import compute_fov
-from render_functions import render_bar, render_dungeon_level, render_name_at_mouse
 from message_log import MessageLog
 from exception import Impossible
 import lzma
 import pickle
+
+from render_functions import render_status
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
@@ -44,7 +45,5 @@ class Engine:
     def render(self, console: Console) -> None:
         self.game_map.render(console)
         self.message_log.render(console)
-        render_bar(console, self.player.fighter.hp, self.player.fighter.max_hp, 20, (0, 45))
-        render_dungeon_level(console, self.game_world.current_floor, (0, 47))
-        render_name_at_mouse(console, self, (21, 44))
+        render_status(console, self)
 

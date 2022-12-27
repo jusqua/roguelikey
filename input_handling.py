@@ -170,8 +170,6 @@ class MainGameEventHandler(EventHandler):
                 return WaitAction(player)
             case tcod.event.K_g:
                 return PickupAction(player)
-            case tcod.event.K_c:
-                return CharacterScreenEventHandler(self.engine)
             case tcod.event.K_v:
                 return HistoryViewer(self.engine)
             case tcod.event.K_i:
@@ -265,34 +263,6 @@ class AskUserEventHandler(EventHandler):
     def on_exit(self) -> Action | BaseEventHandler | None:
         """Called when user try to exit or cancel an action"""
         return MainGameEventHandler(self.engine)
-
-
-class CharacterScreenEventHandler(AskUserEventHandler):
-    TITLE = "Character Information"
-
-    def on_render(self, console: Console) -> None:
-        super().on_render(console)
-
-        x = 40 if self.engine.player.x <= 30 else 0
-        y = 0
-
-        width = len(self.TITLE) + 4
-
-        console.draw_frame(x, y, width, 7, self.TITLE, fg=color.white, bg=color.black)
-
-        console.print(x + 1, y + 1, f"Level: {self.engine.player.level.current_level}")
-        console.print(x + 1, y + 2, f"XP: {self.engine.player.level.current_xp}")
-        console.print(x + 1, y + 3, f"XP for next Level: {self.engine.player.level.experience_to_next_level}",)
-
-        attack_string = f"Attack: {self.engine.player.fighter.base_power}"
-        signal = "+" if self.engine.player.fighter.power_bonus > 0 else ""
-        attack_string += f" ({signal}{self.engine.player.fighter.power_bonus})"
-        console.print(x + 1, y + 4, attack_string)
-
-        defense_string = f"Defense: {self.engine.player.fighter.base_defense}"
-        signal = "+" if self.engine.player.fighter.defense_bonus > 0 else ""
-        defense_string += f" ({signal}{self.engine.player.fighter.defense_bonus})"
-        console.print(x + 1, y + 5, defense_string)
 
 
 class LevelUpEventHandler(AskUserEventHandler):
