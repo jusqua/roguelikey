@@ -63,10 +63,7 @@ MODIFIER_KEYS = {
     tcod.event.K_RALT,
 }
 
-CONFIRM_KEYS = {
-    tcod.event.K_RETURN,
-    tcod.event.K_KP_ENTER
-}
+CONFIRM_KEY = tcod.event.K_SPACE
 
 
 class BaseEventHandler(tcod.event.EventDispatch[Union[Action, "BaseEventHandler"]]):
@@ -249,12 +246,34 @@ class HistoryViewer(EventHandler):
 class AskUserEventHandler(EventHandler):
     """Handles input for special actions"""
 
+    def __init__(self, engine: Engine) -> None:
+        super().__init__(engine)
+        self.cursor = 0
+
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
         """By default any key exit this input handler"""
         if event.sym in MODIFIER_KEYS:
             return None
         return self.on_exit()
 
+    def render_select(self, console: Console, elements: list[str], location: tuple[int, int]) -> None:
+        """Handler selection in position"""
+        x, y = location
+        for i, e in enumerate(elements):
+            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, color.black)
+            console.print(x, y + i, e, fg=fg, bg=bg)
+
+    def cursor_move(self, event: tcod.event.KeyDown, elements_length: int) -> None:
+        match event.sym:
+            case key if key in CURSOR_Y_KEYS:
+                adjust = CURSOR_Y_KEYS[key]
+                if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == elements_length - 1):
+                    return
+                self.cursor = max(0, min(self.cursor + adjust, elements_length - 1))
+            case tcod.event.K_HOME:
+                self.cursor = 0
+            case tcod.event.K_END:
+                self.cursor = elements_length - 1
 
     def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown) -> Action | BaseEventHandler | None:
         """By default any mouse click exit this input handler"""
@@ -266,36 +285,41 @@ class AskUserEventHandler(EventHandler):
 
 
 class LevelUpEventHandler(AskUserEventHandler):
-    TITLE = "Level Up"
+    def __init__(self, engine: Engine) -> None:
+        super().__init__(engine)
+        self.options = [
+            f"Constitution (+20 HP, from {self.engine.player.fighter.max_hp})",
+            f"Strength (+1 attack, from {self.engine.player.fighter.base_power})",
+            f"Agility (+1 defense, from {self.engine.player.fighter.base_defense})",
+        ] 
 
     def on_render(self, console: Console) -> None:
         super().on_render(console)
 
-        x = 40 if self.engine.player.x <= 30 else 0
+        x, y, w, h = 64, 0, 32, 20
 
-        console.draw_frame(x, 0, 35, 8, self.TITLE, fg=color.white, bg=color.black)
-        x += 1
+        console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
+        console.print_box(x, y, w, 1, "┤ Level Up ├", alignment=tcod.constants.CENTER)
+        console.print_box(x, y + h - 1, w - 1, 1, "┤ [SPACE] apply changes ├", alignment=tcod.constants.RIGHT)
 
-        console.print(x, 1, "Congratulations! You level up!")
-        console.print(x, 2, "Select an attribute to increase.")
+        console.print_box(x + 1, y + 2, w, 1, "Congratulations!", alignment=tcod.constants.CENTER)
+        console.print(x + 1, y + 4, "Select an attribute:")
 
-        console.print(x, 4, f"[a] Constitution (+20 HP, from {self.engine.player.fighter.max_hp})")
-        console.print(x, 5, f"[b] Strength (+1 attack, from {self.engine.player.fighter.power})")
-        console.print(x, 6, f"[c] Agility (+1 defense, from {self.engine.player.fighter.defense})")
+        self.render_select(console, self.options, (x + 1, y + 6))
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
-        player = self.engine.player
+        self.cursor_move(event, len(self.options))
+        if event.sym != CONFIRM_KEY:
+            return
 
-        match event.sym:
-            case tcod.event.K_a:
-                player.level.increase_max_hp()
-            case tcod.event.K_b:
-                player.level.increase_power()
-            case tcod.event.K_c:
-                player.level.increase_defense()
-            case _:
-                self.engine.message_log.add_message("Invalid entry.", color.invalid)
-                return None
+        match self.cursor:
+            case 0:
+                self.engine.player.level.increase_max_hp()
+            case 1:
+                self.engine.player.level.increase_power()
+            case 2:
+                self.engine.player.level.increase_defense()
+
         return super().ev_keydown(event)
 
     def ev_mousebuttondown(self, event: tcod.event.MouseButtonDown) -> Action | BaseEventHandler | None:
@@ -411,7 +435,7 @@ class SelectIndexHandler(AskUserEventHandler):
 
             self.engine.mouse_location = x, y
             return None
-        elif key in CONFIRM_KEYS:
+        elif key != CONFIRM_KEY:
             return self.on_index_selected(*self.engine.mouse_location)
         return super().ev_keydown(event)
 

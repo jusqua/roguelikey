@@ -56,6 +56,8 @@ def new_game() -> Engine:
     player.inventory.items.append(robe)
     player.equipment.toggle_equip(robe, False)
 
+    player.level.add_xp(340)
+
     return engine
 
 
