@@ -206,18 +206,18 @@ class HistoryViewer(EventHandler):
         )
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> MainGameEventHandler | None:
-        key = event.sym
-        if key in CURSOR_Y_KEYS:
-            adjust = CURSOR_Y_KEYS[key]
-            if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == self.log_length - 1):
-                return
-            self.cursor = max(0, min(self.cursor + adjust, self.log_length - 1))
-        elif key == tcod.event.K_HOME:
-            self.cursor = 0
-        elif key == tcod.event.K_END:
-            self.cursor = self.log_length - 1
-        else:
-            return MainGameEventHandler(self.engine)
+        match event.sym:
+            case key if key in CURSOR_Y_KEYS:
+                adjust = CURSOR_Y_KEYS[key]
+                if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == self.log_length - 1):
+                    return
+                self.cursor = max(0, min(self.cursor + adjust, self.log_length - 1))
+            case tcod.event.K_HOME:
+                self.cursor = 0
+            case tcod.event.K_END:
+                self.cursor = self.log_length - 1
+            case key if key == QUIT_KEY:
+                return MainGameEventHandler(self.engine)
 
 
 class AskUserEventHandler(EventHandler):
