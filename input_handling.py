@@ -89,6 +89,48 @@ class PopupMessage(BaseEventHandler):
         return self.parent
 
 
+class HelpDialog(PopupMessage):
+    def __init__(self, parent: BaseEventHandler) -> None:
+        text = """
+        # Movement
+        [h] to left
+        [l] to right
+        [j] downwards
+        [k] upwards
+        
+        # Game
+        [i] inventory
+        [v] history
+        [g] pickup item (when avaliable)
+        [>] move to next floor (when avaliable)
+        [esc] menu
+
+        # Select Dialogs
+        [space] select current cursor option
+        [k] cursor up
+        [j] cursor down 
+        [q] quit dialog (except level up)
+
+        # Inventory
+        [d] drop item
+        """
+        super().__init__(parent, text)
+
+    def on_render(self, console: Console) -> None:
+        self.parent.on_render(console)
+        console.tiles_rgb["fg"] //= 8
+        console.tiles_rgb["bg"] //= 8
+
+        console.print(
+            console.width // 2,
+            console.height // 8,
+            self.text,
+            fg=color.white,
+            bg=color.black,
+            alignment=tcod.constants.CENTER
+        )
+
+
 class EventHandler(BaseEventHandler):
     def __init__(self, engine: Engine) -> None:
         self.engine = engine
@@ -149,6 +191,8 @@ class MainGameEventHandler(EventHandler):
                 return InventoryEventHandler(self.engine)
             case tcod.event.K_f:
                 return LookHandler(self.engine)
+            case tcod.event.K_ESCAPE:
+                return HelpDialog(self)
 
         return None
 
