@@ -22,6 +22,16 @@ class Equippable(BaseComponent):
         self.defense_bonus = defense_bonus
         self.luck_bonus = luck_bonus
 
+    @property
+    def description(self) -> str:
+        return "\n".join(
+            [
+                f"Attack Modifier: {self.power_bonus}",
+                f"Defense Modifier: {self.defense_bonus}",
+                f"Luck Modifier: {self.luck_bonus}",
+            ]
+        )
+
 
 class Dagger(Equippable):
     def __init__(self) -> None:

@@ -37,6 +37,10 @@ class Consumable(BaseComponent):
         if isinstance(inventory, Inventory):
             inventory.items.remove(item)
 
+    @property
+    def description(self) -> str:
+        raise NotImplementedError
+
 
 class HealingConsumable(Consumable):
     def __init__(self, amount: int) -> None:
@@ -54,6 +58,10 @@ class HealingConsumable(Consumable):
             color.health_recovered,
         )
         self.consume()
+
+    @property
+    def description(self) -> str:
+        return f"Restores {self.amount} health points."
 
 
 class LightningDamageConsumable(Consumable):
@@ -82,6 +90,10 @@ class LightningDamageConsumable(Consumable):
         )
         target.fighter.take_damage(self.damage)
         self.consume()
+
+    @property
+    def description(self) -> str:
+        return f"Strikes with a lightning bolt the closest enemy within a radius of {self.maximum_range}, dealing {self.damage} hit points."
 
 
 class ConfusionConsumable(Consumable):
@@ -112,6 +124,12 @@ class ConfusionConsumable(Consumable):
         )
         target.ai = ConfusedEnemy(target, target.ai, self.number_of_turns)
         self.consume()
+
+    @property
+    def description(self) -> str:
+        return (
+            f"Select an enemy to confuse its senses for {self.number_of_turns} turns."
+        )
 
 
 class FireballDamageConsumable(Consumable):
@@ -145,3 +163,7 @@ class FireballDamageConsumable(Consumable):
         if not is_target_hit:
             raise Impossible("There are no targets in the radius.")
         self.consume()
+
+    @property
+    def description(self) -> str:
+        return f"Strikes multiple enemies within the selected area, dealing {self.damage} hit points."

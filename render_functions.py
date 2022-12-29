@@ -58,6 +58,11 @@ def render_name_at_mouse(
 
 
 def render_status(console: Console, engine: Engine) -> None:
+    player = engine.player
+    fighter = player.fighter
+    level = player.level
+    equipment = player.equipment
+
     render_name_at_mouse(console, engine, (1, 63))
     console.print(1, 0, f"┤ Floor {engine.game_world.current_floor} ├")
 
@@ -66,8 +71,8 @@ def render_status(console: Console, engine: Engine) -> None:
     console.print_box(x, y, w, 1, "┤ Status ├", alignment=tcod.CENTER)
     render_bar(
         console,
-        engine.player.fighter.hp,
-        engine.player.fighter.max_hp,
+        fighter.hp,
+        fighter.max_hp,
         30,
         (x + 1, y + 2),
     )
@@ -77,27 +82,27 @@ def render_status(console: Console, engine: Engine) -> None:
         y + 4,
         w - 2,
         1,
-        f"XP: {engine.player.level.current_xp} / {engine.player.level.experience_to_next_level}",
+        f"XP: {level.current_xp} / {level.experience_to_next_level}",
         alignment=tcod.RIGHT,
     )
-    console.print(x + 1, y + 4, f"Level: {engine.player.level.current_level}")
+    console.print(x + 1, y + 4, f"Level: {level.current_level}")
 
-    attack_string = f"Attack: {engine.player.fighter.base_power}"
-    if engine.player.fighter.power_bonus != 0:
-        signal = "+" if engine.player.fighter.power_bonus > 0 else ""
-        attack_string += f" ({signal}{engine.player.fighter.power_bonus})"
+    attack_string = f"Attack: {fighter.base_power}"
+    if fighter.power_bonus != 0:
+        signal = "+" if fighter.power_bonus > 0 else ""
+        attack_string += f" ({signal}{fighter.power_bonus})"
     console.print(x + 1, y + 6, attack_string)
 
-    defense_string = f"Defense: {engine.player.fighter.base_defense}"
-    if engine.player.fighter.defense_bonus != 0:
-        signal = "+" if engine.player.fighter.defense_bonus > 0 else ""
-        defense_string += f" ({signal}{engine.player.fighter.defense_bonus})"
+    defense_string = f"Defense: {fighter.base_defense}"
+    if fighter.defense_bonus != 0:
+        signal = "+" if fighter.defense_bonus > 0 else ""
+        defense_string += f" ({signal}{fighter.defense_bonus})"
     console.print(x + 1, y + 7, defense_string)
 
-    luck_string = f"Luck: {engine.player.fighter.base_luck}"
-    if engine.player.fighter.luck_bonus != 0:
-        signal = "+" if engine.player.fighter.luck_bonus > 0 else ""
-        luck_string += f" ({signal}{engine.player.fighter.luck_bonus})"
+    luck_string = f"Luck: {fighter.base_luck}"
+    if fighter.luck_bonus != 0:
+        signal = "+" if fighter.luck_bonus > 0 else ""
+        luck_string += f" ({signal}{fighter.luck_bonus})"
     console.print(x + 1, y + 8, luck_string)
 
     y, h = 12, 28
@@ -105,85 +110,29 @@ def render_status(console: Console, engine: Engine) -> None:
     console.print_box(x, y, w, 1, "┤ Equipment ├", alignment=tcod.CENTER)
 
     console.print_box(x, y + 2, w, 1, "Weapon", alignment=tcod.CENTER)
-    if engine.player.equipment.weapon and engine.player.equipment.weapon.equippable:
-        console.print(x + 1, y + 3, engine.player.equipment.weapon.name)
-        console.print(
-            x + 1,
-            y + 4,
-            f"Attack Modifier: {engine.player.equipment.weapon.equippable.power_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 5,
-            f"Defense Modifier: {engine.player.equipment.weapon.equippable.defense_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 6,
-            f"Luck Modifier: {engine.player.equipment.weapon.equippable.luck_bonus}",
-        )
+    if equipment.weapon and equipment.weapon.equippable:
+        console.print(x + 1, y + 3, equipment.weapon.name)
+        console.print(x + 1, y + 4, equipment.weapon.equippable.description)
     else:
         console.print_box(x, y + 4, w, 1, "No Weapon Equipped", alignment=tcod.CENTER)
 
     console.print_box(x, y + 8, w, 1, "Armor", alignment=tcod.CENTER)
-    if engine.player.equipment.armor and engine.player.equipment.armor.equippable:
-        console.print(x + 1, y + 9, engine.player.equipment.armor.name)
-        console.print(
-            x + 1,
-            y + 10,
-            f"Attack Modifier: {engine.player.equipment.armor.equippable.power_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 11,
-            f"Defense Modifier: {engine.player.equipment.armor.equippable.defense_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 12,
-            f"Luck Modifier: {engine.player.equipment.armor.equippable.luck_bonus}",
-        )
+    if equipment.armor and equipment.armor.equippable:
+        console.print(x + 1, y + 9, equipment.armor.name)
+        console.print(x + 1, y + 10, equipment.armor.equippable.description)
     else:
         console.print_box(x, y + 10, w, 1, "No Armor Equipped", alignment=tcod.CENTER)
 
     console.print_box(x, y + 14, w, 1, "Helmet", alignment=tcod.CENTER)
-    if engine.player.equipment.helmet and engine.player.equipment.helmet.equippable:
-        console.print(x + 1, y + 15, engine.player.equipment.helmet.name)
-        console.print(
-            x + 1,
-            y + 16,
-            f"Attack Modifier: {engine.player.equipment.helmet.equippable.power_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 17,
-            f"Defense Modifier: {engine.player.equipment.helmet.equippable.defense_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 18,
-            f"Luck Modifier: {engine.player.equipment.helmet.equippable.luck_bonus}",
-        )
+    if equipment.helmet and equipment.helmet.equippable:
+        console.print(x + 1, y + 15, equipment.helmet.name)
+        console.print(x + 1, y + 16, equipment.helmet.equippable.description)
     else:
         console.print_box(x, y + 16, w, 1, "No Helmet Equipped", alignment=tcod.CENTER)
 
     console.print_box(x, y + 20, w, 1, "Ring", alignment=tcod.CENTER)
-    if engine.player.equipment.ring and engine.player.equipment.ring.equippable:
-        console.print(x + 1, y + 22, engine.player.equipment.ring.name)
-        console.print(
-            x + 1,
-            y + 23,
-            f"Attack Modifier: {engine.player.equipment.ring.equippable.power_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 24,
-            f"Defense Modifier: {engine.player.equipment.ring.equippable.defense_bonus}",
-        )
-        console.print(
-            x + 1,
-            y + 25,
-            f"Luck Modifier: {engine.player.equipment.ring.equippable.luck_bonus}",
-        )
+    if equipment.ring and equipment.ring.equippable:
+        console.print(x + 1, y + 22, equipment.ring.name)
+        console.print(x + 1, y + 23, equipment.ring.equippable.description)
     else:
         console.print_box(x, y + 22, w, 1, "No Ring Equipped", alignment=tcod.CENTER)
