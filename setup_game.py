@@ -89,24 +89,6 @@ class MainMenu(BaseEventHandler):
             lambda: (_ for _ in ()).throw(SystemExit),
         ]
 
-    def render_select(self, console: Console, elements: list[str]) -> None:
-        """Handler selection in position"""
-        for i, e in enumerate(elements):
-            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, None)
-            console.print_box(0, console.height // 2 + i, console.width, 1, e, fg=fg, bg=bg, alignment=tcod.CENTER)
-
-    def cursor_move(self, event: tcod.event.KeyDown, elements_length: int) -> None:
-        match event.sym:
-            case key if key in CURSOR_Y_KEYS:
-                adjust = CURSOR_Y_KEYS[key]
-                if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == elements_length - 1):
-                    return
-                self.cursor = max(0, min(self.cursor + adjust, elements_length - 1))
-            case tcod.event.K_HOME:
-                self.cursor = 0
-            case tcod.event.K_END:
-                self.cursor = elements_length - 1
-
     def on_render(self, console: Console) -> None:
         """Render the main menu and the background image."""
         console.draw_semigraphics(background_image, 0, 0)
@@ -125,12 +107,23 @@ class MainMenu(BaseEventHandler):
             alignment=tcod.CENTER
         )
 
-        self.render_select(console, ["New Game", "Continue", "Quit"])
+        for i, e in enumerate(self.elements):
+            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, None)
+            console.print_box(0, console.height // 2 + i, console.width, 1, e, fg=fg, bg=bg, alignment=tcod.CENTER)
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> BaseEventHandler | None:
-        self.cursor_move(event, 3)
-        if event.sym != CONFIRM_KEY:
-            return
+        elements_length = len(self.elements)
 
-        return self.functions[self.cursor]()
+        match event.sym:
+            case key if key in CURSOR_Y_KEYS:
+                adjust = CURSOR_Y_KEYS[key]
+                if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == elements_length - 1):
+                    return
+                self.cursor = max(0, min(self.cursor + adjust, elements_length - 1))
+            case tcod.event.K_HOME:
+                self.cursor = 0
+            case tcod.event.K_END:
+                self.cursor = elements_length - 1
+            case key if key == CONFIRM_KEY:
+                return self.functions[self.cursor]()
 
