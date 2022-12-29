@@ -247,7 +247,7 @@ class HistoryViewer(EventHandler):
             y + h - 1,
             w - 1,
             1,
-            "┤ [k] go up | [j] go down ├",
+            "┤ k to go up, j to go down ├",
             alignment=tcod.constants.RIGHT,
         )
         if self.cursor < self.log_length - 1:
@@ -405,7 +405,7 @@ class LevelUpEventHandler(AskUserEventHandler):
     def on_render(self, console: Console) -> None:
         super().on_render(console)
 
-        x, y, w, h = 64, 0, 32, 20
+        x, y, w, h = 64, 0, 32, 64
 
         console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
         console.print_box(x, y, w, 1, "┤ Level Up ├", alignment=tcod.constants.CENTER)
@@ -414,7 +414,7 @@ class LevelUpEventHandler(AskUserEventHandler):
             y + h - 1,
             w - 1,
             1,
-            "┤ [SPACE] apply changes ├",
+            "┤ [SPACE] to apply changes ├",
             alignment=tcod.constants.RIGHT,
         )
 
@@ -446,7 +446,7 @@ class InventoryEventHandler(AskUserEventHandler):
         super().on_render(console)
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
 
-        x, y, w, h = 64, 20, 32, 20
+        x, y, w, h = 64, 0, 32, 64
 
         console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
         console.print_box(x, y, w, 1, "┤ Inventory ├", alignment=tcod.constants.CENTER)
@@ -455,7 +455,7 @@ class InventoryEventHandler(AskUserEventHandler):
             y + h - 1,
             w - 1,
             1,
-            "┤ [SPACE] to use | [d] to drop ├",
+            "┤ SPACE to use, d to drop ├",
             alignment=tcod.constants.RIGHT,
         )
 
