@@ -103,6 +103,7 @@ def render_status(console: Console, engine: Engine) -> None:
     y, h = 12, 28
     console.draw_frame(x, y, w, h)
     console.print_box(x, y, w, 1, "┤ Equipment ├", alignment=tcod.CENTER)
+
     console.print_box(x, y + 2, w, 1, "Weapon", alignment=tcod.CENTER)
     if engine.player.equipment.weapon and engine.player.equipment.weapon.equippable:
         console.print(x + 1, y + 3, engine.player.equipment.weapon.name)
@@ -144,3 +145,45 @@ def render_status(console: Console, engine: Engine) -> None:
         )
     else:
         console.print_box(x, y + 10, w, 1, "No Armor Equipped", alignment=tcod.CENTER)
+
+    console.print_box(x, y + 14, w, 1, "Helmet", alignment=tcod.CENTER)
+    if engine.player.equipment.helmet and engine.player.equipment.helmet.equippable:
+        console.print(x + 1, y + 15, engine.player.equipment.helmet.name)
+        console.print(
+            x + 1,
+            y + 16,
+            f"Attack Modifier: {engine.player.equipment.helmet.equippable.power_bonus}",
+        )
+        console.print(
+            x + 1,
+            y + 17,
+            f"Defense Modifier: {engine.player.equipment.helmet.equippable.defense_bonus}",
+        )
+        console.print(
+            x + 1,
+            y + 18,
+            f"Luck Modifier: {engine.player.equipment.helmet.equippable.luck_bonus}",
+        )
+    else:
+        console.print_box(x, y + 16, w, 1, "No Helmet Equipped", alignment=tcod.CENTER)
+
+    console.print_box(x, y + 20, w, 1, "Ring", alignment=tcod.CENTER)
+    if engine.player.equipment.ring and engine.player.equipment.ring.equippable:
+        console.print(x + 1, y + 22, engine.player.equipment.ring.name)
+        console.print(
+            x + 1,
+            y + 23,
+            f"Attack Modifier: {engine.player.equipment.ring.equippable.power_bonus}",
+        )
+        console.print(
+            x + 1,
+            y + 24,
+            f"Defense Modifier: {engine.player.equipment.ring.equippable.defense_bonus}",
+        )
+        console.print(
+            x + 1,
+            y + 25,
+            f"Luck Modifier: {engine.player.equipment.ring.equippable.luck_bonus}",
+        )
+    else:
+        console.print_box(x, y + 22, w, 1, "No Ring Equipped", alignment=tcod.CENTER)

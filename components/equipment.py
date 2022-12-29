@@ -10,9 +10,17 @@ if TYPE_CHECKING:
 class Equipment(BaseComponent):
     parent: Actor
 
-    def __init__(self, weapon: Item | None = None, armor: Item | None = None) -> None:
+    def __init__(
+        self,
+        weapon: Item | None = None,
+        armor: Item | None = None,
+        helmet: Item | None = None,
+        ring: Item | None = None,
+    ) -> None:
         self.weapon = weapon
         self.armor = armor
+        self.helmet = helmet
+        self.ring = ring
 
     @property
     def defense_bonus(self) -> int:
@@ -21,6 +29,10 @@ class Equipment(BaseComponent):
             bonus += self.weapon.equippable.defense_bonus
         if self.armor and self.armor.equippable:
             bonus += self.armor.equippable.defense_bonus
+        if self.helmet and self.helmet.equippable:
+            bonus += self.helmet.equippable.defense_bonus
+        if self.ring and self.ring.equippable:
+            bonus += self.ring.equippable.defense_bonus
 
         return bonus
 
@@ -31,6 +43,10 @@ class Equipment(BaseComponent):
             bonus += self.weapon.equippable.power_bonus
         if self.armor and self.armor.equippable:
             bonus += self.armor.equippable.power_bonus
+        if self.helmet and self.helmet.equippable:
+            bonus += self.helmet.equippable.power_bonus
+        if self.ring and self.ring.equippable:
+            bonus += self.ring.equippable.power_bonus
 
         return bonus
 
@@ -41,11 +57,20 @@ class Equipment(BaseComponent):
             bonus += self.weapon.equippable.luck_bonus
         if self.armor and self.armor.equippable:
             bonus += self.armor.equippable.luck_bonus
+        if self.helmet and self.helmet.equippable:
+            bonus += self.helmet.equippable.luck_bonus
+        if self.ring and self.ring.equippable:
+            bonus += self.ring.equippable.luck_bonus
 
         return bonus
 
     def is_item_equipped(self, item: Item) -> bool:
-        return self.weapon is item or self.armor is item
+        return (
+            self.weapon is item
+            or self.armor is item
+            or self.ring is item
+            or self.helmet is item
+        )
 
     def equip_to_slot(self, slot: str, item: Item, add_message: bool) -> None:
         current_item: Item = getattr(self, slot)
@@ -76,6 +101,10 @@ class Equipment(BaseComponent):
                 slot = "weapon"
             case EquipmentType.ARMOR:
                 slot = "armor"
+            case EquipmentType.RING:
+                slot = "ring"
+            case EquipmentType.HELMET:
+                slot = "helmet"
 
         if getattr(self, slot) is item:
             self.unequip_from_slot(slot, add_message)

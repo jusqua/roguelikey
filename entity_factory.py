@@ -4,7 +4,20 @@ from components.consumable import (
     HealingConsumable,
     LightningDamageConsumable,
 )
-from components.equippable import Dagger, Sword, Axe, Robe, LeatherArmor, ChainMail
+from components.equippable import (
+    Dagger,
+    EldenRing,
+    Hood,
+    JeweledRing,
+    LeatherCap,
+    RustRing,
+    Sword,
+    Axe,
+    Robe,
+    LeatherArmor,
+    ChainMail,
+    VikingHelmet,
+)
 from components.inventory import Inventory
 from components.level import Level
 from entity import Actor, Item
@@ -65,3 +78,11 @@ axe = Item("Axe", "/", (0, 191, 255), equippable=Axe())
 robe = Item("Robe", "[", (139, 69, 19), equippable=Robe())
 leather_armor = Item("Leather Armor", "[", (139, 69, 19), equippable=LeatherArmor())
 chain_mail = Item("Chain Mail", "[", (139, 69, 19), equippable=ChainMail())
+
+hood = Item("Hood", "^", (218, 165, 32), equippable=Hood())
+leather_cap = Item("Leather Cap", "^", (218, 165, 32), equippable=LeatherCap())
+viking_helmet = Item("Viking Helmet", "^", (218, 165, 32), equippable=VikingHelmet())
+
+rust_ring = Item("Rust Ring", "°", (30, 144, 255), equippable=RustRing())
+jeweled_ring = Item("Jeweled Ring", "°", (30, 144, 255), equippable=JeweledRing())
+elden_ring = Item("Elden Ring", "°", (30, 144, 255), equippable=EldenRing())

@@ -51,3 +51,33 @@ class LeatherArmor(Equippable):
 class ChainMail(Equippable):
     def __init__(self) -> None:
         super().__init__(EquipmentType.ARMOR, -1, 3)
+
+
+class Hood(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.HELMET, 0, 1, 1)
+
+
+class LeatherCap(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.HELMET, defense_bonus=2)
+
+
+class VikingHelmet(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.HELMET, 1, 2, 1)
+
+
+class RustRing(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.RING, luck_bonus=2)
+
+
+class JeweledRing(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.RING, luck_bonus=5)
+
+
+class EldenRing(Equippable):
+    def __init__(self) -> None:
+        super().__init__(EquipmentType.RING, luck_bonus=10)

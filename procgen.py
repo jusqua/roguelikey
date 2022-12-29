@@ -16,18 +16,31 @@ max_enemies_per_floor = [(1, 2), (4, 3), (6, 5)]
 
 items_chances: dict[int, list[tuple[Entity, int]]] = {
     0: [(entity_factory.lesser_health_potion, 35)],
-    2: [(entity_factory.confusion_scroll, 10), (entity_factory.health_potion, 15)],
+    2: [
+        (entity_factory.confusion_scroll, 10),
+        (entity_factory.health_potion, 15),
+        (entity_factory.rust_ring, 5),
+    ],
     4: [
         (entity_factory.lightning_scroll, 25),
         (entity_factory.sword, 5),
         (entity_factory.health_potion, 35),
+        (entity_factory.jeweled_ring, 5),
+        (entity_factory.leather_cap, 5),
     ],
     6: [
         (entity_factory.fireball_scroll, 25),
         (entity_factory.leather_armor, 15),
     ],
-    8: [(entity_factory.axe, 5), (entity_factory.chain_mail, 5)],
-    10: [(entity_factory.greater_health_potion, 15)],
+    8: [
+        (entity_factory.axe, 5),
+        (entity_factory.chain_mail, 5),
+        (entity_factory.elden_ring, 5),
+    ],
+    10: [
+        (entity_factory.greater_health_potion, 15),
+        (entity_factory.viking_helmet, 15),
+    ],
 }
 enemies_chances: dict[int, list[tuple[Entity, int]]] = {
     0: [(entity_factory.orc, 80)],
