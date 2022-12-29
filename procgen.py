@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Iterator, TYPE_CHECKING
-from random import choice, choices, randint, random
+from random import choice, choices, randint
 from game_map import GameMap
 import tile_types
 import entity_factory
@@ -15,17 +15,26 @@ max_items_per_floor = [(1, 1), (4, 2)]
 max_enemies_per_floor = [(1, 2), (4, 3), (6, 5)]
 
 items_chances: dict[int, list[tuple[Entity, int]]] = {
-    0: [(entity_factory.health_potion, 35)],
-    2: [(entity_factory.confusion_scroll, 10)],
-    4: [(entity_factory.lightning_scroll, 25), (entity_factory.sword, 5)],
-    6: [(entity_factory.fireball_scroll, 25), (entity_factory.leather_armor, 15)],
+    0: [(entity_factory.lesser_health_potion, 35)],
+    2: [(entity_factory.confusion_scroll, 10), (entity_factory.health_potion, 15)],
+    4: [
+        (entity_factory.lightning_scroll, 25),
+        (entity_factory.sword, 5),
+        (entity_factory.health_potion, 35),
+    ],
+    6: [
+        (entity_factory.fireball_scroll, 25),
+        (entity_factory.leather_armor, 15),
+    ],
     8: [(entity_factory.axe, 5), (entity_factory.chain_mail, 5)],
+    10: [(entity_factory.greater_health_potion, 15)],
 }
 enemies_chances: dict[int, list[tuple[Entity, int]]] = {
     0: [(entity_factory.orc, 80)],
     3: [(entity_factory.troll, 15)],
-    5: [(entity_factory.troll, 30)],
-    7: [(entity_factory.troll, 60)],
+    5: [(entity_factory.troll, 30), (entity_factory.goblin, 60)],
+    7: [(entity_factory.troll, 60), (entity_factory.goblin, 80)],
+    9: [(entity_factory.hobgoblin, 15)],
 }
 
 
