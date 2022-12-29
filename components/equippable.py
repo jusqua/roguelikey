@@ -24,13 +24,20 @@ class Equippable(BaseComponent):
 
     @property
     def description(self) -> str:
-        return "\n".join(
-            [
-                f"Attack Modifier: {self.power_bonus}",
-                f"Defense Modifier: {self.defense_bonus}",
-                f"Luck Modifier: {self.luck_bonus}",
-            ]
-        )
+        modifiers: list[str] = []
+        if self.power_bonus:
+            signal = "+" if self.power_bonus > 0 else ""
+            modifiers.append(f"{signal}{self.power_bonus} attack")
+        if self.defense_bonus:
+            signal = "+" if self.defense_bonus > 0 else ""
+            modifiers.append(f"{signal}{self.defense_bonus} defense")
+        if self.luck_bonus:
+            signal = "+" if self.luck_bonus > 0 else ""
+            modifiers.append(f"{signal}{self.luck_bonus} luck")
+
+        if not len(modifiers):
+            return "No modifiers"
+        return "\n".join(modifiers)
 
 
 class Dagger(Equippable):
