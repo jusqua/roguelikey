@@ -40,11 +40,11 @@ troll = Actor(
     HostileEnemy, Fighter(16, 4, 1, 1), Level(xp_given=100), "Troll", "T", (0, 127, 0)
 )
 goblin = Actor(
-    HostileEnemy, Fighter(20, 3, 2, 5), Level(xp_given=40), "Goblin", "g", (20, 127, 20)
+    HostileEnemy, Fighter(20, 4, 3, 5), Level(xp_given=40), "Goblin", "g", (20, 127, 20)
 )
 hobgoblin = Actor(
     HostileEnemy,
-    Fighter(20, 5, 3),
+    Fighter(30, 7, 4),
     Level(xp_given=120),
     "Hobgoblin",
     "H",
@@ -52,7 +52,7 @@ hobgoblin = Actor(
 )
 golem = Actor(
     HostileEnemy,
-    Fighter(30, 8, 5),
+    Fighter(50, 10, 5),
     Level(xp_given=200),
     "Golem",
     "G",
