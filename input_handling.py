@@ -238,7 +238,7 @@ class HistoryViewer(EventHandler):
     def on_render(self, console: Console) -> None:
         super().on_render(console)
 
-        x, y, w, h = 64, 40, 32, 24
+        x, y, w, h = 64, 0, 32, 64
 
         console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
         console.print_box(x, y, w, 1, "┤ History ├", alignment=tcod.constants.CENTER)
