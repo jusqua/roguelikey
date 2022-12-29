@@ -58,21 +58,10 @@ def render_name_at_mouse(
 
 
 def render_status(console: Console, engine: Engine) -> None:
-    x, y, w, h = 64, 0, 32, 20
-
     render_name_at_mouse(console, engine, (1, 63))
+    console.print(1, 0, f"┤ Floor {engine.game_world.current_floor} ├")
 
-    match engine.game_world.current_floor:
-        case 1:
-            floor = "1st"
-        case 2:
-            floor = "2nd"
-        case 3:
-            floor = "3rd"
-        case _:
-            floor = f"{engine.game_world.current_floor}th"
-    console.print(1, 0, f"┤ {floor} Floor ├")
-
+    x, y, w, h = 64, 0, 32, 12
     console.draw_frame(x, y, w, h)
     console.print_box(x, y, w, 1, "┤ Status ├", alignment=tcod.CENTER)
     render_bar(
@@ -111,7 +100,7 @@ def render_status(console: Console, engine: Engine) -> None:
         luck_string += f" ({signal}{engine.player.fighter.luck_bonus})"
     console.print(x + 1, y + 8, luck_string)
 
-    y = 20
+    y, h = 12, 28
     console.draw_frame(x, y, w, h)
     console.print_box(x, y, w, 1, "┤ Equipment ├", alignment=tcod.CENTER)
     console.print_box(x, y + 2, w, 1, "Weapon", alignment=tcod.CENTER)
