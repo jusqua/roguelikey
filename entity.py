@@ -5,6 +5,7 @@ from math import sqrt
 from render_order import RenderOrder
 from components.inventory import Inventory
 from components.equipment import Equipment
+
 if TYPE_CHECKING:
     from game_map import GameMap
     from components.ai import BaseAI
@@ -29,7 +30,7 @@ class Entity:
         position: tuple[int, int] = (0, 0),
         blocks_movement: bool = False,
         parent: GameMap | None = None,
-        render_order: RenderOrder = RenderOrder.CORPSE
+        render_order: RenderOrder = RenderOrder.CORPSE,
     ) -> None:
         self.name = name
         self.char = char
@@ -52,7 +53,7 @@ class Entity:
     def distance_between(self, x: int, y: int) -> float:
         """Return the distance between self and other position"""
         return sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
-    
+
     def place(self, position: tuple[int, int], game_map: GameMap | None = None) -> None:
         """Handle moving across new location, i.e. game maps"""
         self.x, self.y = position
@@ -95,9 +96,11 @@ class Actor(Entity):
         blocks_movement: bool = True,
         game_map: GameMap | None = None,
         inventory: Inventory | None = None,
-        equipment: Equipment | None = None
+        equipment: Equipment | None = None,
     ) -> None:
-        super().__init__(name, char, color, position, blocks_movement, game_map, RenderOrder.ACTOR)
+        super().__init__(
+            name, char, color, position, blocks_movement, game_map, RenderOrder.ACTOR
+        )
 
         self.ai: BaseAI | None = ai(self)
 
@@ -137,9 +140,11 @@ class Item(Entity):
         blocks_movement: bool = False,
         parent: GameMap | None = None,
         consumable: Consumable | None = None,
-        equippable: Equippable | None = None
+        equippable: Equippable | None = None,
     ) -> None:
-        super().__init__(name, char, color, position, blocks_movement, parent, RenderOrder.ITEM)
+        super().__init__(
+            name, char, color, position, blocks_movement, parent, RenderOrder.ITEM
+        )
 
         self.consumable = consumable
         if self.consumable:
@@ -148,4 +153,3 @@ class Item(Entity):
         self.equippable = equippable
         if self.equippable:
             self.equippable.parent = self
-

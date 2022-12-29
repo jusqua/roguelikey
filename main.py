@@ -30,7 +30,9 @@ def main() -> None:
                 except Exception:
                     traceback.print_exc()
                     if isinstance(handler, EventHandler):
-                        handler.engine.message_log.add_message(traceback.format_exc(), color.error)
+                        handler.engine.message_log.add_message(
+                            traceback.format_exc(), color.error
+                        )
         except QuitWithoutSave:
             raise
         except (SystemExit, BaseException):
@@ -40,4 +42,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

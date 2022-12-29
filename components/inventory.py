@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
+
 if TYPE_CHECKING:
     from entity import Actor, Item
 
@@ -19,4 +20,3 @@ class Inventory(BaseComponent):
         self.items.remove(item)
         item.place(self.parent.position, self.game_map)
         self.engine.message_log.add_message(f"You dropped the {item.name}.")
-

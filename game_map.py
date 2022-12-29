@@ -4,13 +4,16 @@ from tcod.console import Console
 from entity import Actor, Item
 import numpy as np
 import tile_types
+
 if TYPE_CHECKING:
     from entity import Entity
     from engine import Engine
 
 
 class GameMap:
-    def __init__(self, engine: Engine, size: tuple[int, int], entities: Iterable[Entity]) -> None:
+    def __init__(
+        self, engine: Engine, size: tuple[int, int], entities: Iterable[Entity]
+    ) -> None:
         self.engine = engine
         self.width, self.height = size
         self.tiles = np.full(size, fill_value=tile_types.wall, order="F")
@@ -62,14 +65,16 @@ class GameMap:
         In `explored` array tiles are draw with `dark` colors,
         Otherwise the default is `SHROUD`
         """
-        console.tiles_rgb[0:self.width, 0:self.height] = np.select(
+        console.tiles_rgb[0 : self.width, 0 : self.height] = np.select(
             condlist=[self.visible, self.explored],
             choicelist=[self.tiles["light"], self.tiles["dark"]],
-            default=tile_types.SHROUD
+            default=tile_types.SHROUD,
         )
         console.draw_frame(0, 0, 64, 64, clear=False)
 
-        entities_sorted_rendering = sorted(self.entities, key=lambda x: x.render_order.value)
+        entities_sorted_rendering = sorted(
+            self.entities, key=lambda x: x.render_order.value
+        )
 
         for entity in entities_sorted_rendering:
             if self.visible[entity.position]:
@@ -78,14 +83,15 @@ class GameMap:
 
 class GameWorld:
     """Holds the settings for the GameMap, and generates new maps when moving down the stairs."""
+
     def __init__(
-            self,
-            max_rooms: int,
-            room_limits: tuple[int, int],
-            map_size: tuple[int, int],
-            engine: Engine,
-            current_floor: int = 0
-        ) -> None:
+        self,
+        max_rooms: int,
+        room_limits: tuple[int, int],
+        map_size: tuple[int, int],
+        engine: Engine,
+        current_floor: int = 0,
+    ) -> None:
         self.engine = engine
         self.map_size = map_size
         self.max_rooms = max_rooms
@@ -94,11 +100,8 @@ class GameWorld:
 
     def generate_floor(self) -> None:
         from procgen import generate_dungeon
+
         self.current_floor += 1
         self.engine.game_map = generate_dungeon(
-            self.max_rooms,
-            self.room_limits,
-            self.map_size,
-            self.engine
+            self.max_rooms, self.room_limits, self.map_size, self.engine
         )
-

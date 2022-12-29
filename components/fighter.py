@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
 from render_order import RenderOrder
 import color
+
 if TYPE_CHECKING:
     from entity import Actor
 
@@ -55,7 +56,9 @@ class Fighter(BaseComponent):
         if self.engine.player is self.parent:
             self.engine.message_log.add_message("You died!", color.player_die)
         else:
-            self.engine.message_log.add_message(f"{self.parent.name} is dead!", color.enemy_die)
+            self.engine.message_log.add_message(
+                f"{self.parent.name} is dead!", color.enemy_die
+            )
 
         self.parent.char = "%"
         self.parent.color = (191, 0, 0)
@@ -65,4 +68,3 @@ class Fighter(BaseComponent):
         self.parent.render_order = RenderOrder.CORPSE
 
         self.engine.player.level.add_xp(self.parent.level.xp_given)
-

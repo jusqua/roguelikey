@@ -3,7 +3,14 @@ from copy import deepcopy
 from tcod.console import Console
 from engine import Engine
 from game_map import GameWorld
-from input_handling import CONFIRM_KEY, CURSOR_Y_KEYS, BaseEventHandler, EventHandler, MainGameEventHandler, PopupMessage
+from input_handling import (
+    CONFIRM_KEY,
+    CURSOR_Y_KEYS,
+    BaseEventHandler,
+    EventHandler,
+    MainGameEventHandler,
+    PopupMessage,
+)
 import os
 import entity_factory
 import color
@@ -13,7 +20,9 @@ import pickle
 
 
 # https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
-tileset = tcod.tileset.load_tilesheet("./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437)
+tileset = tcod.tileset.load_tilesheet(
+    "./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437
+)
 # [:, :, :3] removes the alpha channel from background
 background_image = tcod.image.load("./assets/menu_background.png")[:, :, :3]
 # Reduce sharp corners from tileset rendering
@@ -33,17 +42,14 @@ def new_game() -> Engine:
     player = deepcopy(entity_factory.player)
     engine = Engine(player)
 
-    engine.game_world = GameWorld(
-        max_rooms,
-        room_limits,
-        map_size,
-        engine
-    )
+    engine.game_world = GameWorld(max_rooms, room_limits, map_size, engine)
 
     engine.game_world.generate_floor()
     engine.update_fov()
 
-    engine.message_log.add_message("Hello and welcome, adventure, to this ... roguelike?", color.welcome_text)
+    engine.message_log.add_message(
+        "Hello and welcome, adventure, to this ... roguelike?", color.welcome_text
+    )
 
     dagger = deepcopy(entity_factory.dagger)
     dagger.parent = player.inventory
@@ -76,16 +82,15 @@ def load_game(filename: str) -> Engine:
 
 class MainMenu(BaseEventHandler):
     """Handle the main menu rendering and input."""
+
     def __init__(self) -> None:
         self.cursor = 0
-        self.elements = [
-            "New Game",
-            "Continue previous Game",
-            "Quit"
-        ]
+        self.elements = ["New Game", "Continue previous Game", "Quit"]
         self.functions = [
             lambda: MainGameEventHandler(new_game()),
-            lambda: MainGameEventHandler(load_game(save_file_name)) if save_file_name in os.listdir() else PopupMessage(self, "No saved game to load."),
+            lambda: MainGameEventHandler(load_game(save_file_name))
+            if save_file_name in os.listdir()
+            else PopupMessage(self, "No saved game to load."),
             lambda: (_ for _ in ()).throw(SystemExit),
         ]
 
@@ -97,19 +102,30 @@ class MainMenu(BaseEventHandler):
             console.height // 2 - 4,
             "ROGUELIKEY",
             fg=color.menu_title,
-            alignment=tcod.CENTER
+            alignment=tcod.CENTER,
         )
         console.print(
             console.width // 2,
             console.height - 2,
             "By jusqua",
             fg=color.menu_title,
-            alignment=tcod.CENTER
+            alignment=tcod.CENTER,
         )
 
         for i, e in enumerate(self.elements):
-            fg, bg = (color.black, color.white) if self.cursor == i else (color.white, None)
-            console.print_box(0, console.height // 2 + i, console.width, 1, e, fg=fg, bg=bg, alignment=tcod.CENTER)
+            fg, bg = (
+                (color.black, color.white) if self.cursor == i else (color.white, None)
+            )
+            console.print_box(
+                0,
+                console.height // 2 + i,
+                console.width,
+                1,
+                e,
+                fg=fg,
+                bg=bg,
+                alignment=tcod.CENTER,
+            )
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> BaseEventHandler | None:
         elements_length = len(self.elements)
@@ -117,7 +133,9 @@ class MainMenu(BaseEventHandler):
         match event.sym:
             case key if key in CURSOR_Y_KEYS:
                 adjust = CURSOR_Y_KEYS[key]
-                if (adjust < 0 and self.cursor == 0) or (adjust > 0 and self.cursor == elements_length - 1):
+                if (adjust < 0 and self.cursor == 0) or (
+                    adjust > 0 and self.cursor == elements_length - 1
+                ):
                     return
                 self.cursor = max(0, min(self.cursor + adjust, elements_length - 1))
             case tcod.event.K_HOME:
@@ -126,4 +144,3 @@ class MainMenu(BaseEventHandler):
                 self.cursor = elements_length - 1
             case key if key == CONFIRM_KEY:
                 return self.functions[self.cursor]()
-

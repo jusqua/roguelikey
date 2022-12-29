@@ -8,6 +8,7 @@ import lzma
 import pickle
 
 from render_functions import render_status
+
 if TYPE_CHECKING:
     from entity import Actor
     from game_map import GameMap, GameWorld
@@ -39,11 +40,12 @@ class Engine:
 
     def update_fov(self) -> None:
         """Recompute visible area based on the player POV"""
-        self.game_map.visible[:] = compute_fov(self.game_map.tiles["transparent"], self.player.info[0:2], radius=8)
+        self.game_map.visible[:] = compute_fov(
+            self.game_map.tiles["transparent"], self.player.info[0:2], radius=8
+        )
         self.game_map.explored |= self.game_map.visible
-    
+
     def render(self, console: Console) -> None:
         self.game_map.render(console)
         self.message_log.render(console)
         render_status(console, self)
-

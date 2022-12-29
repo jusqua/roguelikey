@@ -4,6 +4,7 @@ from random import choice
 from action import Action, MovementAction, MeleeAction, WaitAction, BumpAction
 import numpy as np
 import tcod
+
 if TYPE_CHECKING:
     from entity import Actor
 
@@ -57,18 +58,24 @@ class ConfusedEnemy(BaseAI):
     A confused enemy will stumble around aimlessly for given amount of turns, then revert to previous ai.
     It will attack if an actor occupies a tile it is randomly moving into, it will attack.
     """
-    def __init__(self, entity: Actor, previous_ai: BaseAI | None, turns_remaining: int) -> None:
+
+    def __init__(
+        self, entity: Actor, previous_ai: BaseAI | None, turns_remaining: int
+    ) -> None:
         super().__init__(entity)
         self.previous_ai = previous_ai
         self.turns_remaining = turns_remaining
 
     def perform(self) -> None:
         if self.turns_remaining <= 0:
-            self.engine.message_log.add_message(f"The {self.entity.name} is no longer confused.")
+            self.engine.message_log.add_message(
+                f"The {self.entity.name} is no longer confused."
+            )
             self.entity.ai = self.previous_ai
             return None
 
-        random_direction = choice([(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)])
+        random_direction = choice(
+            [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+        )
         self.turns_remaining -= 1
         return BumpAction(self.entity, *random_direction).perform()
-

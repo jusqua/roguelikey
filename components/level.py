@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
+
 if TYPE_CHECKING:
     from entity import Actor
 
@@ -14,7 +15,7 @@ class Level(BaseComponent):
         current_xp: int = 0,
         level_up_base: int = 0,
         level_up_factor: int = 150,
-        xp_given: int = 0
+        xp_given: int = 0,
     ) -> None:
         self.current_level = current_level
         self.current_xp = current_xp
@@ -38,7 +39,9 @@ class Level(BaseComponent):
         self.engine.message_log.add_message(f"You gain {xp} experience points.")
 
         if self.requires_level_up:
-            self.engine.message_log.add_message(f"You advance to level {self.current_level + 1}!")
+            self.engine.message_log.add_message(
+                f"You advance to level {self.current_level + 1}!"
+            )
 
     def increase_level(self) -> None:
         self.current_xp -= self.experience_to_next_level
@@ -62,4 +65,3 @@ class Level(BaseComponent):
 
         self.engine.message_log.add_message("Your movement are getting swifter!")
         self.increase_level()
-

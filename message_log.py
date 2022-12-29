@@ -22,7 +22,9 @@ class MessageLog:
     def __init__(self) -> None:
         self.messages: list[Message] = []
 
-    def add_message(self, text: str, fg: tuple[int, int, int] = color.white, *, stack: bool = True) -> None:
+    def add_message(
+        self, text: str, fg: tuple[int, int, int] = color.white, *, stack: bool = True
+    ) -> None:
         """
         Add message to this log
         `text` is the plain text
@@ -50,13 +52,13 @@ class MessageLog:
 
     @classmethod
     def render_messages(
-            cls,
-            console: Console,
-            position: tuple[int, int],
-            size: tuple[int, int],
-            messages: Reversible[Message],
-            gap: tuple[int, int] = (2, 2)
-        ) -> None:
+        cls,
+        console: Console,
+        position: tuple[int, int],
+        size: tuple[int, int],
+        messages: Reversible[Message],
+        gap: tuple[int, int] = (2, 2),
+    ) -> None:
         """
         Render provided messages
         The `messages` are rendered starting at the last message and working backwords
@@ -76,4 +78,3 @@ class MessageLog:
                 y_offset += 1
                 if y_offset >= h:
                     return
-

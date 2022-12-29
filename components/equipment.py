@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from components.base_component import BaseComponent
 from equipment_type import EquipmentType
+
 if TYPE_CHECKING:
     from entity import Item, Actor
 
@@ -43,14 +44,18 @@ class Equipment(BaseComponent):
         setattr(self, slot, item)
 
         if add_message:
-            self.parent.game_map.engine.message_log.add_message(f"You equip the {item.name}.")
+            self.parent.game_map.engine.message_log.add_message(
+                f"You equip the {item.name}."
+            )
 
     def unequip_from_slot(self, slot: str, add_message: bool) -> None:
         current_item: Item = getattr(self, slot)
         setattr(self, slot, None)
 
         if add_message:
-            self.parent.game_map.engine.message_log.add_message(f"You remove the {current_item.name}.")
+            self.parent.game_map.engine.message_log.add_message(
+                f"You remove the {current_item.name}."
+            )
 
     def toggle_equip(self, item: Item, add_message: bool = True) -> None:
         if not item.equippable:
@@ -66,4 +71,3 @@ class Equipment(BaseComponent):
             self.unequip_from_slot(slot, add_message)
         else:
             self.equip_to_slot(slot, item, add_message)
-

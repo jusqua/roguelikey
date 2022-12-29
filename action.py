@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from exception import Impossible
 import color
+
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity, Actor, Item
@@ -66,21 +67,25 @@ class MeleeAction(ActionWithDirection):
             attack_color = color.enemy_attack
 
         if damage > 0:
-            self.engine.message_log.add_message(f"{attack_description} for {damage} hit points.", attack_color)
+            self.engine.message_log.add_message(
+                f"{attack_description} for {damage} hit points.", attack_color
+            )
             target.fighter.hp -= damage
         else:
-            self.engine.message_log.add_message(f"{attack_description} but does no damage.", attack_color)
+            self.engine.message_log.add_message(
+                f"{attack_description} but does no damage.", attack_color
+            )
 
 
 class MovementAction(ActionWithDirection):
     def perform(self) -> None:
         if (
-            not self.engine.game_map.in_bounds(*self.position) or
-            not self.engine.game_map.tiles["walkable"][self.position] or
-            self.blocking_entity
+            not self.engine.game_map.in_bounds(*self.position)
+            or not self.engine.game_map.tiles["walkable"][self.position]
+            or self.blocking_entity
         ):
             raise Impossible("That way is blocked")
-        
+
         self.entity.move(self.dx, self.dy)
         if self.engine.player is self.entity:
             self.engine.is_mouse_motion = False
@@ -96,7 +101,9 @@ class BumpAction(ActionWithDirection):
 
 
 class ItemAction(Action):
-    def __init__(self, entity: Actor, item: Item, target_position: tuple[int, int] | None = None) -> None:
+    def __init__(
+        self, entity: Actor, item: Item, target_position: tuple[int, int] | None = None
+    ) -> None:
         super().__init__(entity)
         self.item = item
         if not target_position:
@@ -150,4 +157,3 @@ class EquipAction(Action):
 
     def perform(self) -> None:
         self.entity.equipment.toggle_equip(self.item)
-

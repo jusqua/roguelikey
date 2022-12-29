@@ -5,20 +5,14 @@ from game_map import GameMap
 import tile_types
 import entity_factory
 import tcod
+
 if TYPE_CHECKING:
     from engine import Engine
     from entity import Entity
 
 
-max_items_per_floor = [
-    (1, 1),
-    (4, 2)
-]
-max_enemies_per_floor = [
-    (1, 2),
-    (4, 3),
-    (6, 5)
-]
+max_items_per_floor = [(1, 1), (4, 2)]
+max_enemies_per_floor = [(1, 2), (4, 3), (6, 5)]
 
 items_chances: dict[int, list[tuple[Entity, int]]] = {
     0: [(entity_factory.health_potion, 35)],
@@ -38,7 +32,7 @@ enemies_chances: dict[int, list[tuple[Entity, int]]] = {
 def get_entities_at_random(
     weighted_chances_by_floor: dict[int, list[tuple[Entity, int]]],
     number_of_entities: int,
-    current_floor: int
+    current_floor: int,
 ) -> list[Entity]:
     entities: list[Entity] = []
     entity_weighted_chance_values: list[int] = []
@@ -51,11 +45,15 @@ def get_entities_at_random(
             entities.append(entity)
             entity_weighted_chance_values.append(weighted_chance)
 
-    chosen_entities = choices(entities, weights=entity_weighted_chance_values, k=number_of_entities)
+    chosen_entities = choices(
+        entities, weights=entity_weighted_chance_values, k=number_of_entities
+    )
     return chosen_entities
 
 
-def get_max_value_for_floor(max_value_per_floor: list[tuple[int, int]], floor: int) -> int:
+def get_max_value_for_floor(
+    max_value_per_floor: list[tuple[int, int]], floor: int
+) -> int:
     current_value = 0
 
     for floor_minimum, value in max_value_per_floor:
@@ -84,14 +82,16 @@ class RectangularRoom:
 
     def intersects(self, other: RectangularRoom) -> bool:
         return (
-            self.x1 <= other.x2 and
-            self.x2 >= other.x1 and
-            self.y1 <= other.y2 and
-            self.y2 >= other.y1
+            self.x1 <= other.x2
+            and self.x2 >= other.x1
+            and self.y1 <= other.y2
+            and self.y2 >= other.y1
         )
 
 
-def tunnel_between(start: tuple[int, int], end: tuple[int, int]) -> Iterator[tuple[int, int]]:
+def tunnel_between(
+    start: tuple[int, int], end: tuple[int, int]
+) -> Iterator[tuple[int, int]]:
     """Create a L-shaped tunnel between those points"""
     corner = choice(((end[0], start[1]), (start[0], end[1])))
 
@@ -101,10 +101,14 @@ def tunnel_between(start: tuple[int, int], end: tuple[int, int]) -> Iterator[tup
         yield x, y
 
 
-def rectangular_room(room_limits: tuple[int, int], map_size: tuple[int, int]) -> RectangularRoom:
+def rectangular_room(
+    room_limits: tuple[int, int], map_size: tuple[int, int]
+) -> RectangularRoom:
     """Generate a room based on given specs"""
     room_size = randint(*room_limits), randint(*room_limits)
-    room_position = randint(2, map_size[0] - room_size[0] - 3), randint(2, map_size[1] - room_size[1] - 3)
+    room_position = randint(2, map_size[0] - room_size[0] - 3), randint(
+        2, map_size[1] - room_size[1] - 3
+    )
     return RectangularRoom(*room_position, *room_size)
 
 
@@ -113,8 +117,12 @@ def get_random_position_at(room: RectangularRoom) -> tuple[int, int]:
 
 
 def place_entities(room: RectangularRoom, dungeon: GameMap, current_floor: int) -> None:
-    number_of_enemies = randint(0, get_max_value_for_floor(max_enemies_per_floor, current_floor))
-    number_of_items = randint(0, get_max_value_for_floor(max_items_per_floor, current_floor))
+    number_of_enemies = randint(
+        0, get_max_value_for_floor(max_enemies_per_floor, current_floor)
+    )
+    number_of_items = randint(
+        0, get_max_value_for_floor(max_items_per_floor, current_floor)
+    )
 
     enemies = get_entities_at_random(enemies_chances, number_of_enemies, current_floor)
     items = get_entities_at_random(items_chances, number_of_items, current_floor)
@@ -126,11 +134,11 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, current_floor: int) 
 
 
 def generate_dungeon(
-        max_rooms: int,
-        room_limits: tuple[int, int],
-        map_size: tuple[int, int],
-        engine: Engine,
-    ) -> GameMap:
+    max_rooms: int,
+    room_limits: tuple[int, int],
+    map_size: tuple[int, int],
+    engine: Engine,
+) -> GameMap:
     """Generates a new dungeon map"""
     player = engine.player
     dungeon = GameMap(engine, map_size, entities=[player])
@@ -156,4 +164,3 @@ def generate_dungeon(
         rooms.append(new_room)
 
     return dungeon
-
