@@ -290,15 +290,24 @@ class AskUserEventHandler(EventHandler):
         return self.on_exit()
 
     def render_select(
-        self, console: Console, elements: list[str], location: tuple[int, int]
+        self,
+        console: Console,
+        elements: list[str],
+        location: tuple[int, int],
+        fgs: list[tuple[int, int, int]] | None = None,
     ) -> None:
         """Handler selection in position"""
         x, y = location
-        for i, e in enumerate(elements):
+        if not fgs:
+            fgs = [color.white for _ in range(len(elements))]
+        printables = zip(elements, fgs)
+
+        for i, printable in enumerate(printables):
+            e, fg = printable
             fg, bg = (
-                (color.black, color.white)
+                (color.black if fg == color.white else fg, color.white)
                 if self.cursor == i
-                else (color.white, color.black)
+                else (fg, None)
             )
             self.print_element(console, (x, y + i), e, fg=fg, bg=bg, index=i)
 
@@ -466,13 +475,15 @@ class InventoryEventHandler(AskUserEventHandler):
             return
 
         items = []
+        fgs = []
         for item in self.engine.player.inventory.items:
+            item_text = f"{item.char} {item.name}"
             if self.engine.player.equipment.is_item_equipped(item):
-                items.append(item.name + " (E)")
-            else:
-                items.append(item.name)
+                item_text += " (E)"
+            items.append(item_text)
+            fgs.append(item.color)
 
-        self.render_select(console, items, (x + 1, y + 1))
+        self.render_select(console, items, (x + 1, y + 1), fgs=fgs)
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
