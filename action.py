@@ -1,4 +1,5 @@
 from __future__ import annotations
+from random import randint
 from typing import TYPE_CHECKING
 from exception import Impossible
 import color
@@ -58,23 +59,27 @@ class MeleeAction(ActionWithDirection):
         if not target:
             raise Impossible("No target to melee")
 
-        damage = self.entity.fighter.power - target.fighter.defense
+        critical_hit = self.entity.fighter.luck >= randint(1, 100)
+        damage = max(
+            0, self.entity.fighter.power * (1 + critical_hit) - target.fighter.defense
+        )
+
         attack_description = f"{self.entity.name.capitalize()} attacks {target.name}"
-
-        if self.entity is self.engine.player:
-            attack_color = color.player_attack
-        else:
-            attack_color = color.enemy_attack
-
+        if critical_hit:
+            attack_description += " giving a CRITICAL strike"
         if damage > 0:
-            self.engine.message_log.add_message(
-                f"{attack_description} for {damage} hit points.", attack_color
-            )
-            target.fighter.hp -= damage
+            attack_description += f" for {damage} hit points."
         else:
-            self.engine.message_log.add_message(
-                f"{attack_description} but does no damage.", attack_color
-            )
+            attack_description += " but does no damage."
+
+        attack_color = (
+            color.player_attack
+            if self.entity is self.engine.player
+            else color.enemy_attack
+        )
+
+        self.engine.message_log.add_message(attack_description, attack_color)
+        target.fighter.hp -= damage
 
 
 class MovementAction(ActionWithDirection):

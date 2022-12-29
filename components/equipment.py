@@ -34,6 +34,16 @@ class Equipment(BaseComponent):
 
         return bonus
 
+    @property
+    def luck_bonus(self) -> int:
+        bonus = 0
+        if self.weapon and self.weapon.equippable:
+            bonus += self.weapon.equippable.luck_bonus
+        if self.armor and self.armor.equippable:
+            bonus += self.armor.equippable.luck_bonus
+
+        return bonus
+
     def is_item_equipped(self, item: Item) -> bool:
         return self.weapon is item or self.armor is item
 

@@ -14,7 +14,7 @@ from components.fighter import Fighter
 
 player = Actor(
     HostileEnemy,
-    Fighter(30, 5, 2),
+    Fighter(30, 5, 2, 100),
     Level(level_up_base=200),
     "Player",
     "@",
