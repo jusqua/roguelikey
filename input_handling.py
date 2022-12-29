@@ -393,11 +393,13 @@ class LevelUpEventHandler(AskUserEventHandler):
             f"Constitution (+20 HP, from {self.engine.player.fighter.max_hp})",
             f"Strength (+1 attack, from {self.engine.player.fighter.base_power})",
             f"Agility (+1 defense, from {self.engine.player.fighter.base_defense})",
+            f"Dexterity (+2 luck, from {self.engine.player.fighter.base_luck})",
         ]
         self.functions = [
             self.engine.player.level.increase_max_hp,
             self.engine.player.level.increase_power,
             self.engine.player.level.increase_defense,
+            self.engine.player.level.increase_luck,
         ]
 
     def on_render(self, console: Console) -> None:
