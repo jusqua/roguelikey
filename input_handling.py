@@ -37,9 +37,10 @@ MODIFIER_KEYS = {
     tcod.event.K_RALT,
 }
 
+QUIT_KEYS = [tcod.event.K_q, tcod.event.K_ESCAPE]
+
 WAIT_KEYS = tcod.event.K_w
 CONFIRM_KEY = tcod.event.K_SPACE
-QUIT_KEY = tcod.event.K_q
 DISCARD_KEY = tcod.event.K_d
 
 
@@ -94,29 +95,29 @@ class PopupMessage(BaseEventHandler):
 
 class HelpDialog(PopupMessage):
     def __init__(self, parent: BaseEventHandler) -> None:
-        text = """
-        # Movement
-        [h] to left
-        [l] to right
-        [j] downwards
-        [k] upwards
-        
-        # Game
-        [i] inventory
-        [v] history
-        [g] pickup item (when avaliable)
-        [>] move to next floor (when avaliable)
-        [esc] menu
-
-        # Select Dialogs
-        [space] select current cursor option
-        [k] cursor up
-        [j] cursor down 
-        [q] quit dialog (except level up)
-
-        # Inventory
-        [d] drop item
-        """
+        text = "\n".join(
+            [
+                "\n\n# Movement",
+                "[h] to go left",
+                "[l] to go right",
+                "[j] to go downwards",
+                "[k] to go upwards",
+                "[w] wait a turn",
+                "\n\n# Game",
+                "[i] open inventory",
+                "[v] show history logs",
+                "[g] pickup an item (when avaliable)",
+                "[>] move to next floor (when avaliable)",
+                "[esc] menu",
+                "\n\n# Select Dialogs",
+                "[space] select current cursor option",
+                "[k] cursor up",
+                "[j] cursor down",
+                "[q] or [esc] to current quit dialog",
+                "\n\n# Inventory",
+                "[d] drop item",
+            ]
+        )
         super().__init__(parent, text)
 
     def on_render(self, console: Console) -> None:
@@ -125,12 +126,11 @@ class HelpDialog(PopupMessage):
         console.tiles_rgb["bg"] //= 8
 
         console.print(
-            console.width // 2,
+            console.width // 4,
             console.height // 8,
             self.text,
             fg=color.white,
             bg=color.black,
-            alignment=tcod.constants.CENTER,
         )
 
 
@@ -272,7 +272,7 @@ class HistoryViewer(EventHandler):
                 self.cursor = 0
             case tcod.event.K_END:
                 self.cursor = self.log_length - 1
-            case key if key == QUIT_KEY:
+            case key if key in QUIT_KEYS:
                 return MainGameEventHandler(self.engine)
 
 
@@ -387,7 +387,7 @@ class InGameMenu(AskUserEventHandler, PopupMessage):
         )
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
-        if event.sym in [tcod.event.K_ESCAPE, QUIT_KEY]:
+        if event.sym in QUIT_KEYS:
             return super().ev_keydown(event)
 
         self.cursor_move(event, len(self.elements))
@@ -489,7 +489,7 @@ class InventoryEventHandler(AskUserEventHandler):
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
         key = event.sym
 
-        if key == QUIT_KEY:
+        if key in QUIT_KEYS:
             return super().ev_keydown(event)
 
         if number_of_items_in_inventory == 0:
