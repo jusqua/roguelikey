@@ -27,28 +27,36 @@ from components.fighter import Fighter
 
 player = Actor(
     HostileEnemy,
-    Fighter(30, 5, 2, 100),
+    Fighter(30, 3, 1, 5),
     Level(level_up_base=200),
     "Player",
     "@",
-    inventory=Inventory(26),
+    inventory=Inventory(30),
 )
 orc = Actor(
-    HostileEnemy, Fighter(10, 3, 0), Level(xp_given=35), "Orc", "o", (63, 127, 63)
+    HostileEnemy, Fighter(10, 3, 1), Level(xp_given=35), "Orc", "o", (63, 127, 63)
 )
 troll = Actor(
     HostileEnemy, Fighter(16, 4, 1, 1), Level(xp_given=100), "Troll", "T", (0, 127, 0)
 )
 goblin = Actor(
-    HostileEnemy, Fighter(12, 2, 2, 5), Level(xp_given=40), "Goblin", "g", (20, 127, 20)
+    HostileEnemy, Fighter(20, 3, 2, 5), Level(xp_given=40), "Goblin", "g", (20, 127, 20)
 )
 hobgoblin = Actor(
     HostileEnemy,
-    Fighter(20, 5, 1),
-    Level(xp_given=100),
+    Fighter(20, 5, 3),
+    Level(xp_given=120),
     "Hobgoblin",
-    "G",
+    "H",
     (20, 150, 20),
+)
+golem = Actor(
+    HostileEnemy,
+    Fighter(30, 8, 5),
+    Level(xp_given=200),
+    "Golem",
+    "G",
+    (143, 188, 143),
 )
 
 lesser_health_potion = Item(
@@ -58,7 +66,7 @@ health_potion = Item(
     "Health Potion", "!", (127, 0, 255), consumable=HealingConsumable(4)
 )
 greater_health_potion = Item(
-    "Greater Health Potion", "!", (127, 0, 255), consumable=HealingConsumable(4)
+    "Greater Health Potion", "!", (127, 0, 255), consumable=HealingConsumable(8)
 )
 
 lightning_scroll = Item(

@@ -46,8 +46,12 @@ enemies_chances: dict[int, list[tuple[Entity, int]]] = {
     0: [(entity_factory.orc, 80)],
     3: [(entity_factory.troll, 15)],
     5: [(entity_factory.troll, 30), (entity_factory.goblin, 60)],
-    7: [(entity_factory.troll, 60), (entity_factory.goblin, 80)],
-    9: [(entity_factory.hobgoblin, 15)],
+    7: [
+        (entity_factory.troll, 60),
+        (entity_factory.goblin, 80),
+        (entity_factory.hobgoblin, 15),
+    ],
+    9: [(entity_factory.golem, 5)],
 }
 
 

@@ -35,17 +35,17 @@ class Equippable(BaseComponent):
 
 class Dagger(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.WEAPON, 2, 1)
+        super().__init__(EquipmentType.WEAPON, 1, 0)
 
 
 class Sword(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.WEAPON, 3)
+        super().__init__(EquipmentType.WEAPON, 2)
 
 
 class Axe(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.WEAPON, 4, -1)
+        super().__init__(EquipmentType.WEAPON, 3, -1)
 
 
 class Robe(Equippable):
@@ -60,22 +60,22 @@ class LeatherArmor(Equippable):
 
 class ChainMail(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.ARMOR, -1, 3)
+        super().__init__(EquipmentType.ARMOR, -1, 4)
 
 
 class Hood(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.HELMET, 0, 1, 1)
+        super().__init__(EquipmentType.HELMET)
 
 
 class LeatherCap(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.HELMET, defense_bonus=2)
+        super().__init__(EquipmentType.HELMET, defense_bonus=1)
 
 
 class VikingHelmet(Equippable):
     def __init__(self) -> None:
-        super().__init__(EquipmentType.HELMET, 1, 2, 1)
+        super().__init__(EquipmentType.HELMET, 1, 2)
 
 
 class RustRing(Equippable):

@@ -48,7 +48,7 @@ def new_game() -> Engine:
     engine.update_fov()
 
     engine.message_log.add_message(
-        "Hello and welcome, adventure, to this ... roguelike?", color.welcome_text
+        "You enter into the depths of the dungeon...", color.welcome_text
     )
 
     dagger = deepcopy(entity_factory.dagger)
@@ -61,7 +61,10 @@ def new_game() -> Engine:
     player.inventory.items.append(robe)
     player.equipment.toggle_equip(robe, False)
 
-    player.level.add_xp(340)
+    hood = deepcopy(entity_factory.hood)
+    hood.parent = player.inventory
+    player.inventory.items.append(hood)
+    player.equipment.toggle_equip(hood, False)
 
     return engine
 
