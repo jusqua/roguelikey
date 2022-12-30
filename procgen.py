@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Iterator, TYPE_CHECKING
 from random import choice, choices, randint
 from game_map import GameMap
+from rooms import RectangularRoom, Room
 import tile_types
 import entity_factory
 import tcod
@@ -90,31 +91,6 @@ def get_max_value_for_floor(
     return current_value
 
 
-class RectangularRoom:
-    def __init__(self, x: int, y: int, width: int, height: int) -> None:
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + width
-        self.y2 = y + height
-
-    @property
-    def center(self) -> tuple[int, int]:
-        return int((self.x1 + self.x2) / 2), int((self.y1 + self.y2) / 2)
-
-    @property
-    def inner(self) -> tuple[slice, slice]:
-        """Return the inner area of this room as a 2D array index"""
-        return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
-
-    def intersects(self, other: RectangularRoom) -> bool:
-        return (
-            self.x1 <= other.x2
-            and self.x2 >= other.x1
-            and self.y1 <= other.y2
-            and self.y2 >= other.y1
-        )
-
-
 def tunnel_between(
     start: tuple[int, int], end: tuple[int, int]
 ) -> Iterator[tuple[int, int]]:
@@ -169,7 +145,7 @@ def generate_dungeon(
     player = engine.player
     dungeon = GameMap(engine, map_size, entities=[player])
 
-    rooms: list[RectangularRoom] = [rectangular_room(room_limits, map_size)]
+    rooms: list[Room] = [rectangular_room(room_limits, map_size)]
     dungeon.tiles[rooms[0].inner] = tile_types.floor
     player.place(rooms[0].center, dungeon)
 
