@@ -1,11 +1,11 @@
 from __future__ import annotations
-from typing import Iterator, TYPE_CHECKING
-from random import choice, choices, randint
+from typing import TYPE_CHECKING
+from random import choices, randint
 from game_map import GameMap
-from rooms import RectangularRoom, Room
+from generation import dig
+from generation.rooms import RectangularRoom, Room
 import tile_types
 import entity_factory
-import tcod
 
 if TYPE_CHECKING:
     from engine import Engine
@@ -78,59 +78,30 @@ def get_entities_at_random(
     return chosen_entities
 
 
-def get_max_value_for_floor(
-    max_value_per_floor: list[tuple[int, int]], floor: int
-) -> int:
-    current_value = 0
-
-    for floor_minimum, value in max_value_per_floor:
-        if floor_minimum > floor:
-            break
-        current_value = value
-
-    return current_value
+def get_floor_max_value(max_value_list: list[tuple[int, int]], floor: int) -> int:
+    for floor_min, value in max_value_list:
+        if floor < floor_min:
+            return value
+    return max_value_list[-1][1]
 
 
-def tunnel_between(
-    start: tuple[int, int], end: tuple[int, int]
-) -> Iterator[tuple[int, int]]:
-    """Create a L-shaped tunnel between those points"""
-    corner = choice(((end[0], start[1]), (start[0], end[1])))
-
-    for x, y in tcod.los.bresenham(start, corner).tolist():
-        yield x, y
-    for x, y in tcod.los.bresenham(corner, end).tolist():
-        yield x, y
-
-
-def rectangular_room(
+def generate_rectangular_room(
     room_limits: tuple[int, int], map_size: tuple[int, int]
 ) -> RectangularRoom:
-    """Generate a room based on given specs"""
-    room_size = randint(*room_limits), randint(*room_limits)
-    room_position = randint(2, map_size[0] - room_size[0] - 3), randint(
-        2, map_size[1] - room_size[1] - 3
-    )
-    return RectangularRoom(*room_position, *room_size)
+    w, h = randint(*room_limits), randint(*room_limits)
+    x, y = randint(2, map_size[0] - w - 3), randint(2, map_size[1] - h - 3)
+    return RectangularRoom(x, y, w, h)
 
 
-def get_random_position_at(room: RectangularRoom) -> tuple[int, int]:
-    return randint(room.x1 + 1, room.x2 - 1), randint(room.y1 + 1, room.y2 - 1)
+def populate_room(dungeon: GameMap, room: Room, floor: int) -> None:
+    number_of_enemies = randint(0, get_floor_max_value(max_enemies_per_floor, floor))
+    number_of_items = randint(0, get_floor_max_value(max_items_per_floor, floor))
 
-
-def place_entities(room: RectangularRoom, dungeon: GameMap, current_floor: int) -> None:
-    number_of_enemies = randint(
-        0, get_max_value_for_floor(max_enemies_per_floor, current_floor)
-    )
-    number_of_items = randint(
-        0, get_max_value_for_floor(max_items_per_floor, current_floor)
-    )
-
-    enemies = get_entities_at_random(enemies_chances, number_of_enemies, current_floor)
-    items = get_entities_at_random(items_chances, number_of_items, current_floor)
+    enemies = get_entities_at_random(enemies_chances, number_of_enemies, floor)
+    items = get_entities_at_random(items_chances, number_of_items, floor)
 
     for entity in enemies + items:
-        position = get_random_position_at(room)
+        position = randint(room.x1 + 1, room.x2 - 1), randint(room.y1 + 1, room.y2 - 1)
         if not any(position == entity.position for entity in dungeon.entities):
             entity.spawn(dungeon, position)
 
@@ -143,26 +114,29 @@ def generate_dungeon(
 ) -> GameMap:
     """Generates a new dungeon map"""
     player = engine.player
+    current_floor = engine.game_world.current_floor
     dungeon = GameMap(engine, map_size, entities=[player])
 
-    rooms: list[Room] = [rectangular_room(room_limits, map_size)]
-    dungeon.tiles[rooms[0].inner] = tile_types.floor
+    rooms: list[Room] = [generate_rectangular_room(room_limits, map_size)]
+    for position in rooms[0].inner:
+        dungeon.tiles[position] = tile_types.floor
     player.place(rooms[0].center, dungeon)
 
     for _ in range(max_rooms - 1):
-        new_room = rectangular_room(room_limits, map_size)
+        new_room = generate_rectangular_room(room_limits, map_size)
         if any(new_room.intersects(room) for room in rooms):
             continue
 
-        dungeon.tiles[new_room.inner] = tile_types.floor
-        for position in tunnel_between(rooms[-1].center, new_room.center):
+        for position in new_room.inner:
             dungeon.tiles[position] = tile_types.floor
-        place_entities(new_room, dungeon, engine.game_world.current_floor)
+        for position in dig.tunnel_between(rooms[-1].center, new_room.center):
+            dungeon.tiles[position] = tile_types.floor
 
-        last_room_center = new_room.center
-        dungeon.tiles[last_room_center] = tile_types.down_stairs
-        dungeon.down_stairs_location = last_room_center
+        populate_room(dungeon, new_room, current_floor)
 
         rooms.append(new_room)
+
+    dungeon.tiles[rooms[-1].center] = tile_types.down_stairs
+    dungeon.down_stairs_location = rooms[-1].center
 
     return dungeon

@@ -99,7 +99,7 @@ class GameWorld:
         self.current_floor = current_floor
 
     def generate_floor(self) -> None:
-        from procgen import generate_dungeon
+        from generation.dungeon import generate_dungeon
 
         self.current_floor += 1
         self.engine.game_map = generate_dungeon(
