@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Iterator
+import numpy as np
 
 
 class Room:
@@ -8,6 +9,12 @@ class Room:
         self.y1 = y
         self.x2 = x + width
         self.y2 = y + height
+        self.width = width
+        self.height = height
+
+    @property
+    def size(self) -> tuple[int, int]:
+        return self.width, self.height
 
     @property
     def center(self) -> tuple[int, int]:
@@ -27,13 +34,25 @@ class Room:
 
     @property
     def inner(self) -> list[tuple[int, int]]:
-        """Return the inner area of this room as a 2D array index."""
+        """Return the inner area of this room as a list of coordinates."""
         raise NotImplementedError
 
 
 class RectangularRoom(Room):
     @property
     def inner(self) -> Iterator[tuple[int, int]]:
-        for x in range(self.x1, self.x2):
-            for y in range(self.y1, self.y2):
-                yield x, y
+        for x, y in np.ndindex(self.size):
+            yield self.x1 + x, self.y1 + y
+
+
+class EllipticalRoom(Room):
+    @property
+    def inner(self) -> Iterator[tuple[int, int]]:
+        # cx and cy are the center and the radius because are based on an arbitrary position
+        w, h = self.size
+        cx, cy = w / 2, h / 2
+        for x, y in np.ndindex(w, h):
+            dx = ((x - cx) ** 2) / (cx**2)
+            dy = ((y - cy) ** 2) / (cy**2)
+            if dx + dy <= 1:
+                yield self.x1 + x, self.y1 + y

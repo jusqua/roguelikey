@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from random import choice, choices, randint
 from game_map import GameMap
 from generation import build
-from generation.rooms import RectangularRoom, Room
+from generation.rooms import EllipticalRoom, RectangularRoom, Room
 import tile_types
 import entity_factory
 
@@ -85,12 +85,11 @@ def get_floor_max_value(max_value_list: list[tuple[int, int]], floor: int) -> in
     return max_value_list[-1][1]
 
 
-def generate_rectangular_room(
-    room_limits: tuple[int, int], map_size: tuple[int, int]
-) -> RectangularRoom:
+def generate_room(room_limits: tuple[int, int], map_size: tuple[int, int]) -> Room:
     w, h = randint(*room_limits), randint(*room_limits)
     x, y = randint(2, map_size[0] - w - 3), randint(2, map_size[1] - h - 3)
-    return RectangularRoom(x, y, w, h)
+    room_types = [RectangularRoom, EllipticalRoom]
+    return choice(room_types)(x, y, w, h)
 
 
 def populate_room(dungeon: GameMap, room: Room, floor: int) -> None:
@@ -117,13 +116,13 @@ def generate_dungeon(
     current_floor = engine.game_world.current_floor
     dungeon = GameMap(engine, map_size, entities=[player])
 
-    rooms: list[Room] = [generate_rectangular_room(room_limits, map_size)]
+    rooms: list[Room] = [generate_room(room_limits, map_size)]
     for position in rooms[0].inner:
         dungeon.tiles[position] = tile_types.floor
     player.place(rooms[0].center, dungeon)
 
     for _ in range(max_rooms - 1):
-        new_room = generate_rectangular_room(room_limits, map_size)
+        new_room = generate_room(room_limits, map_size)
         if any(new_room.intersects(room) for room in rooms):
             continue
 
