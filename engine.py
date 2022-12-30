@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import tcod
 from tcod.console import Console
 from tcod.map import compute_fov
 from message_log import MessageLog
@@ -41,7 +42,10 @@ class Engine:
     def update_fov(self) -> None:
         """Recompute visible area based on the player POV"""
         self.game_map.visible[:] = compute_fov(
-            self.game_map.tiles["transparent"], self.player.info[0:2], radius=8
+            self.game_map.tiles["transparent"],
+            self.player.info[0:2],
+            radius=8,
+            algorithm=tcod.FOV_SYMMETRIC_SHADOWCAST,
         )
         self.game_map.explored |= self.game_map.visible
 
