@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from random import choices, randint
+from random import choice, choices, randint
 from game_map import GameMap
 from generation import build
 from generation.rooms import RectangularRoom, Room
@@ -101,7 +101,7 @@ def populate_room(dungeon: GameMap, room: Room, floor: int) -> None:
     items = get_entities_at_random(items_chances, number_of_items, floor)
 
     for entity in enemies + items:
-        position = randint(room.x1 + 1, room.x2 - 1), randint(room.y1 + 1, room.y2 - 1)
+        position = choice(list(room.inner))
         if not any(position == entity.position for entity in dungeon.entities):
             entity.spawn(dungeon, position)
 
