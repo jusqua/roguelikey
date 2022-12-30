@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from random import choices, randint
 from game_map import GameMap
-from generation import dig
+from generation import build
 from generation.rooms import RectangularRoom, Room
 import tile_types
 import entity_factory
@@ -129,7 +129,7 @@ def generate_dungeon(
 
         for position in new_room.inner:
             dungeon.tiles[position] = tile_types.floor
-        for position in dig.tunnel_between(rooms[-1].center, new_room.center):
+        for position in build.tunnel_between(rooms[-1].center, new_room.center):
             dungeon.tiles[position] = tile_types.floor
 
         populate_room(dungeon, new_room, current_floor)
