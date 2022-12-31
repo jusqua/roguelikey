@@ -36,7 +36,7 @@ save_file_name = "data.sav"
 def new_game() -> Engine:
     """Return a brand new game as an Engine instance."""
     map_size = screen_size[0] - 32, screen_size[1]
-    room_limits = 6, 10
+    room_limits = 8, 12
     max_rooms = 30
 
     player = deepcopy(entity_factory.player)
