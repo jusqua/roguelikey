@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from random import choice, choices, randint
 from game_map import GameMap
 from generation import build
-from generation.rooms import EllipticalRoom, RectangularRoom, Room
+from generation.rooms import EllipticalRoom, OvalRoom, RectangularRoom, Room
 import tile_types
 import entity_factory
 
@@ -88,7 +88,7 @@ def get_floor_max_value(max_value_list: list[tuple[int, int]], floor: int) -> in
 def generate_room(room_limits: tuple[int, int], map_size: tuple[int, int]) -> Room:
     w, h = randint(*room_limits), randint(*room_limits)
     x, y = randint(2, map_size[0] - w - 3), randint(2, map_size[1] - h - 3)
-    room_types = [RectangularRoom, EllipticalRoom]
+    room_types = [RectangularRoom, OvalRoom, EllipticalRoom]
     return choice(room_types)(x, y, w, h)
 
 

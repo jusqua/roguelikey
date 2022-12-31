@@ -45,6 +45,14 @@ class RectangularRoom(Room):
             yield self.x1 + x, self.y1 + y
 
 
+class OvalRoom(Room):
+    @property
+    def inner(self) -> Iterator[tuple[int, int]]:
+        for x, y in np.ndindex(self.size):
+            if x not in (0, self.width - 1) or y not in (0, self.height - 1):
+                yield self.x1 + x, self.y1 + y
+
+
 class EllipticalRoom(Room):
     @property
     def inner(self) -> Iterator[tuple[int, int]]:
