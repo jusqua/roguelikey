@@ -66,6 +66,11 @@ def new_game() -> Engine:
     player.inventory.items.append(hood)
     player.equipment.toggle_equip(hood, False)
 
+    confusion_scroll = deepcopy(entity_factory.confusion_scroll)
+    confusion_scroll.parent = player.inventory
+    player.inventory.items.append(confusion_scroll)
+    player.equipment.toggle_equip(confusion_scroll, False)
+
     return engine
 
 
