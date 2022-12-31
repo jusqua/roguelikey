@@ -1,4 +1,6 @@
 from __future__ import annotations
+from input_handling import BaseEventHandler, EventHandler
+from exception import QuitWithoutSave
 from copy import deepcopy
 from tcod.console import Console
 from engine import Engine
@@ -11,6 +13,11 @@ from input_handling import (
     MainGameEventHandler,
     PopupMessage,
 )
+import tcod.context
+import tcod.event
+import tcod.console
+import color
+import traceback
 import os
 import entity_factory
 import color
@@ -19,18 +26,49 @@ import lzma
 import pickle
 
 
-# https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
-tileset = tcod.tileset.load_tilesheet(
-    "./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437
-)
-# [:, :, :3] removes the alpha channel from background
-background_image = tcod.image.load("./assets/menu_background.png")[:, :, :3]
-# Reduce sharp corners from tileset rendering
-os.environ["SDL_RENDER_SCALE_QUALITY"] = "linear"
 # Screen Size
 screen_size = 96, 64
 # Save file name
 save_file_name = "data.sav"
+
+
+def main() -> None:
+    handler: BaseEventHandler = MainMenu()
+
+    # https://dwarffortresswiki.org/index.php/Tileset_repository#Zilk_16x16.png
+    tileset = tcod.tileset.load_tilesheet(
+        "./assets/tileset.png", 16, 16, tcod.tileset.CHARMAP_CP437
+    )
+    # Reduce sharp corners from tileset rendering
+    os.environ["SDL_RENDER_SCALE_QUALITY"] = "linear"
+
+    with tcod.context.new_terminal(
+        *screen_size,
+        tileset=tileset,
+        title="Roguelikey",
+        sdl_window_flags=tcod.context.SDL_WINDOW_FULLSCREEN_DESKTOP,
+    ) as context:
+        root_console = tcod.console.Console(*screen_size, order="F")
+        try:
+            while True:
+                root_console.clear()
+                handler.on_render(root_console)
+                context.present(root_console, keep_aspect=True, integer_scaling=True)
+                try:
+                    for event in tcod.event.wait():
+                        context.convert_event(event)
+                        handler = handler.handle_events(event)
+                except Exception:
+                    traceback.print_exc()
+                    if isinstance(handler, EventHandler):
+                        handler.engine.message_log.add_message(
+                            traceback.format_exc(), color.error
+                        )
+        except QuitWithoutSave:
+            raise
+        except (SystemExit, BaseException):
+            save_game(handler, save_file_name)
+            raise
 
 
 def new_game() -> Engine:
@@ -104,7 +142,6 @@ class MainMenu(BaseEventHandler):
 
     def on_render(self, console: Console) -> None:
         """Render the main menu and the background image."""
-        console.draw_semigraphics(background_image, 0, 0)
         console.print(
             console.width // 2,
             console.height // 2 - 4,
@@ -152,3 +189,7 @@ class MainMenu(BaseEventHandler):
                 self.cursor = elements_length - 1
             case key if key == CONFIRM_KEY:
                 return self.functions[self.cursor]()
+
+
+if __name__ == "__main__":
+    main()

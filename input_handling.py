@@ -338,14 +338,17 @@ class AskUserEventHandler(EventHandler):
 
 class GameOverEventHandler(AskUserEventHandler):
     def __init__(self, parent: EventHandler) -> None:
-        from setup_game import MainMenu
+        from project import MainMenu
+
+        if os.path.exists("data.sav"):
+            os.remove("data.sav")
 
         self.parent = parent
         self.engine = parent.engine
         self.cursor = 0
 
         self.elements = ["Return to Main Menu", "Quit"]
-        self.functions = [MainMenu, self.on_quit]
+        self.functions = [MainMenu, self.ev_quit]
 
     def on_render(self, console: Console) -> None:
         self.parent.on_render(console)
@@ -389,13 +392,8 @@ class GameOverEventHandler(AskUserEventHandler):
         if event.sym == CONFIRM_KEY:
             return self.functions[self.cursor]()
 
-    def on_quit(self) -> None:
-        if os.path.exists("data.sav"):
-            os.remove("data.sav")
-        raise QuitWithoutSave
-
     def ev_quit(self, _: tcod.event.Quit) -> Action | BaseEventHandler | None:
-        self.on_quit()
+        raise QuitWithoutSave
 
 
 class InGameMenu(AskUserEventHandler, PopupMessage):
