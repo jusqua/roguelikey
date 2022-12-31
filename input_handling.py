@@ -551,7 +551,7 @@ class SelectIndexHandler(AskUserEventHandler):
 
             self.engine.mouse_location = x, y
             return None
-        elif key != CONFIRM_KEY:
+        elif key == CONFIRM_KEY:
             return self.on_index_selected(*self.engine.mouse_location)
         return super().ev_keydown(event)
 
