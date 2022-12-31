@@ -4,7 +4,6 @@ from textwrap import wrap
 from typing import TYPE_CHECKING, Callable, Union
 from action import Action, DropAction, BumpAction, EquipAction, WaitAction, PickupAction
 from tcod.console import Console
-from entity import Item
 from exception import Impossible, QuitWithoutSave
 import tcod.constants
 import tcod.event
@@ -152,7 +151,7 @@ class EventHandler(BaseEventHandler):
             return action_or_state
         elif self.handle_action(action_or_state):
             if not self.engine.player.is_alive:
-                return GameOverEventHandler(self.engine)
+                return GameOverEventHandler(self)
             elif self.engine.player.level.requires_level_up:
                 return LevelUpEventHandler(self.engine)
             return MainGameEventHandler(self.engine)
@@ -206,22 +205,6 @@ class MainGameEventHandler(EventHandler):
             case tcod.event.K_ESCAPE:
                 return InGameMenu(self)
 
-        return None
-
-
-class GameOverEventHandler(EventHandler):
-    def on_quit(self) -> None:
-        """Handles exit without saving."""
-        if os.path.exists("data.sav"):
-            os.remove("data.sav")
-        raise QuitWithoutSave
-
-    def ev_quit(self, _: tcod.event.Quit) -> Action | BaseEventHandler | None:
-        self.on_quit()
-
-    def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
-        if event.sym == tcod.event.K_ESCAPE:
-            self.on_quit()
         return None
 
 
@@ -351,6 +334,68 @@ class AskUserEventHandler(EventHandler):
     def on_exit(self) -> Action | BaseEventHandler | None:
         """Called when user try to exit or cancel an action"""
         return MainGameEventHandler(self.engine)
+
+
+class GameOverEventHandler(AskUserEventHandler):
+    def __init__(self, parent: EventHandler) -> None:
+        from setup_game import MainMenu
+
+        self.parent = parent
+        self.engine = parent.engine
+        self.cursor = 0
+
+        self.elements = ["Return to Main Menu", "Quit"]
+        self.functions = [MainMenu, self.on_quit]
+
+    def on_render(self, console: Console) -> None:
+        self.parent.on_render(console)
+        console.tiles_rgb["fg"] //= 8
+        console.tiles_rgb["bg"] //= 8
+
+        console.print_box(
+            0,
+            console.height // 2 - 2,
+            console.width,
+            1,
+            "Game Over",
+            color.player_die,
+            alignment=tcod.constants.CENTER,
+        )
+
+        self.render_select(
+            console, self.elements, (console.width // 2, console.height // 2)
+        )
+
+    def print_element(
+        self,
+        console: Console,
+        position: tuple[int, int],
+        element: str,
+        index: int = 0,
+        **kwargs,
+    ):
+        console.print_box(
+            0,
+            console.height // 2 + index,
+            console.width,
+            1,
+            element,
+            **kwargs,
+            alignment=tcod.constants.CENTER,
+        )
+
+    def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
+        self.cursor_move(event, len(self.elements))
+        if event.sym == CONFIRM_KEY:
+            return self.functions[self.cursor]()
+
+    def on_quit(self) -> None:
+        if os.path.exists("data.sav"):
+            os.remove("data.sav")
+        raise QuitWithoutSave
+
+    def ev_quit(self, _: tcod.event.Quit) -> Action | BaseEventHandler | None:
+        self.on_quit()
 
 
 class InGameMenu(AskUserEventHandler, PopupMessage):
