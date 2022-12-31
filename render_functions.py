@@ -108,31 +108,27 @@ def render_status(console: Console, engine: Engine) -> None:
     y, h = 12, 28
     console.draw_frame(x, y, w, h)
     console.print_box(x, y, w, 1, "┤ Equipment ├", alignment=tcod.CENTER)
+    y += 2
 
-    console.print_box(x, y + 2, w, 1, "Weapon", alignment=tcod.CENTER)
     if equipment.weapon and equipment.weapon.equippable:
-        console.print(x + 1, y + 3, equipment.weapon.name)
-        console.print(x + 1, y + 4, equipment.weapon.equippable.description)
-    else:
-        console.print_box(x, y + 4, w, 1, "No Weapon Equipped", alignment=tcod.CENTER)
+        console.print(x + 1, y, "Weapon: " + equipment.weapon.name)
+        console.print(x + 1, y + 1, equipment.weapon.equippable.description)
+        y += 4
 
-    console.print_box(x, y + 8, w, 1, "Armor", alignment=tcod.CENTER)
     if equipment.armor and equipment.armor.equippable:
-        console.print(x + 1, y + 9, equipment.armor.name)
-        console.print(x + 1, y + 10, equipment.armor.equippable.description)
-    else:
-        console.print_box(x, y + 10, w, 1, "No Armor Equipped", alignment=tcod.CENTER)
+        console.print(x + 1, y, "Armor: " + equipment.armor.name)
+        console.print(x + 1, y + 1, equipment.armor.equippable.description)
+        y += 4
 
-    console.print_box(x, y + 14, w, 1, "Helmet", alignment=tcod.CENTER)
     if equipment.helmet and equipment.helmet.equippable:
-        console.print(x + 1, y + 15, equipment.helmet.name)
-        console.print(x + 1, y + 16, equipment.helmet.equippable.description)
-    else:
-        console.print_box(x, y + 16, w, 1, "No Helmet Equipped", alignment=tcod.CENTER)
+        console.print(x + 1, y, "Helmet: " + equipment.helmet.name)
+        console.print(x + 1, y + 1, equipment.helmet.equippable.description)
+        y += 4
 
-    console.print_box(x, y + 20, w, 1, "Ring", alignment=tcod.CENTER)
     if equipment.ring and equipment.ring.equippable:
-        console.print(x + 1, y + 22, equipment.ring.name)
-        console.print(x + 1, y + 23, equipment.ring.equippable.description)
-    else:
-        console.print_box(x, y + 22, w, 1, "No Ring Equipped", alignment=tcod.CENTER)
+        console.print(x + 1, y, "Ring: " + equipment.ring.name)
+        console.print(x + 1, y + 1, equipment.ring.equippable.description)
+        y += 4
+
+    if y == 14:
+        console.print_box(x, y, w, 1, "(Nothing Equipped)", alignment=tcod.CENTER)
