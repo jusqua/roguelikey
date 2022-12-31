@@ -464,7 +464,15 @@ class InventoryEventHandler(AskUserEventHandler):
 
         x, y, w, h = 64, 0, 32, 64
         console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
-        console.print_box(x, y, w, 1, "┤ Inventory ├", alignment=tcod.constants.CENTER)
+        console.print_box(x + 1, y, w, 1, "┤ Inventory ├")
+        console.print_box(
+            x,
+            y,
+            w - 1,
+            1,
+            f"┤ {number_of_items_in_inventory}/{self.engine.player.inventory.capacity} ├",
+            alignment=tcod.constants.RIGHT,
+        )
 
         if number_of_items_in_inventory == 0:
             console.print_box(
