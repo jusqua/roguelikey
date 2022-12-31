@@ -153,3 +153,13 @@ class Item(Entity):
         self.equippable = equippable
         if self.equippable:
             self.equippable.parent = self
+
+    @property
+    def description(self) -> str:
+        if self.consumable:
+            text = f"Consumable: {self.consumable.description}"
+        elif self.equippable:
+            text = f"Equippable: {self.equippable.description}"
+        else:
+            text = "It is a mistery..."
+        return text

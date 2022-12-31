@@ -1,8 +1,10 @@
 from __future__ import annotations
 import os
+from textwrap import wrap
 from typing import TYPE_CHECKING, Callable, Union
 from action import Action, DropAction, BumpAction, EquipAction, WaitAction, PickupAction
 from tcod.console import Console
+from entity import Item
 from exception import Impossible, QuitWithoutSave
 import tcod.constants
 import tcod.event
@@ -461,17 +463,8 @@ class InventoryEventHandler(AskUserEventHandler):
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
 
         x, y, w, h = 64, 0, 32, 64
-
         console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
         console.print_box(x, y, w, 1, "┤ Inventory ├", alignment=tcod.constants.CENTER)
-        console.print_box(
-            x,
-            y + h - 1,
-            w - 1,
-            1,
-            "┤ SPACE to use, d to drop ├",
-            alignment=tcod.constants.RIGHT,
-        )
 
         if number_of_items_in_inventory == 0:
             console.print_box(
@@ -479,7 +472,7 @@ class InventoryEventHandler(AskUserEventHandler):
             )
             return
 
-        items = []
+        items: list[str] = []
         fgs = []
         for item in self.engine.player.inventory.items:
             item_text = f"{item.char} {item.name}"
@@ -489,6 +482,25 @@ class InventoryEventHandler(AskUserEventHandler):
             fgs.append(item.color)
 
         self.render_select(console, items, (x + 1, y + 1), fgs=fgs)
+
+        if items:
+            y, h = 48, 16
+            console.draw_frame(x, y, w, h, fg=color.white, bg=color.black)
+            console.print_box(
+                x, y, w - 1, 1, "┤ Description ├", alignment=tcod.constants.RIGHT
+            )
+            console.print(x, y, "├")
+            console.print(x + w - 1, y, "┤")
+            console.print(
+                x + 1,
+                y + 1,
+                "\n".join(
+                    wrap(
+                        self.engine.player.inventory.items[self.cursor].description,
+                        w - 2,
+                    )
+                ),
+            )
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Action | BaseEventHandler | None:
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
